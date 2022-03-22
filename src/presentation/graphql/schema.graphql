@@ -1,0 +1,47 @@
+type Query{
+    bookOne(filter: BookFilter!): Book!
+    bookAll(filter: BookFilter, page: Page, sort: BookSort): BookPage!
+}
+
+type Mutation{
+#    bookCreate(input: BookCreateInput!): Book!
+#    bookOneUpdate(input: BookUpdateInput!): Book!
+    bookDelete(filter: BookFilter!): Int!
+}
+
+scalar Time
+
+input IntFilter {
+    eq: Int
+    in: [Int!]
+}
+
+input TextFilter {
+    search: String!
+    caseSensitive: Boolean!
+}
+
+input DateFilter {
+    eq: Time
+    gt: Time
+    gte: Time
+    lt: Time
+    lte: Time
+}
+
+input Page {
+    size: Int!
+    number: Int!
+}
+
+type PageInfo {
+    size: Int!
+    number: Int!
+    totalCount: Int!
+}
+
+enum SortDirection {
+    asc
+    desc
+    none
+}

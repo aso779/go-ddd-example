@@ -1,0 +1,24 @@
+type Book {
+    "id"
+    id: Int!
+    "title"
+    title: String!
+    #    "genre"
+    #    genre: Genre!
+}
+
+input BookFilter {
+    id: IntFilter
+    title: TextFilter
+}
+
+input BookSort {
+    id: SortDirection
+    title: SortDirection
+    createdAt: SortDirection
+}
+
+type BookPage {
+    items: [Book!]!
+    pageInfo: PageInfo
+}

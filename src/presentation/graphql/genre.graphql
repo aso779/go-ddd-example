@@ -1,0 +1,11 @@
+type Genre {
+    "id"
+    id: Int!
+    "name"
+    name: String!
+    "parentId"
+    parentId: Int!
+
+    "subgenres"
+    subgenres: [Genre]!
+}

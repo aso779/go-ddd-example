@@ -1,0 +1,15 @@
+version: '3.6'
+services:
+  pg:
+    container_name: pg
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=books
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - TZ=Europe/Kiev
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+    ports:
+      - "9432:5432"
+    command: [ "postgres", "-c", "log_statement=all" ]

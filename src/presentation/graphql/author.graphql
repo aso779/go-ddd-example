@@ -1,0 +1,9 @@
+type Author {
+    "id"
+    id: Int!
+    "name"
+    name: String!
+
+    "relation to books"
+    books: [Book]!
+}

@@ -1,0 +1,21 @@
+schema:
+  - "presentation/graphql/*.graphql"
+exec:
+  filename: ./infrastructure/graph/generated.go
+model:
+  filename: ./presentation/adapters/generated.go
+  package: adapters
+
+models:
+  Book:
+    model: ./presentation/adapters.BookOutput
+  BookFilter:
+    model: ./presentation/adapters.BookFilter
+  BookSort:
+    model: ./presentation/adapters.BookSort
+  User:
+    model: ./presentation/adapters.UserOutput
+  Page:
+    model: ./infrastructure.Page
+  PageInfo:
+    model: ./infrastructure.PageInfo
