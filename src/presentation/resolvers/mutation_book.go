@@ -12,7 +12,7 @@ func (r *mutationResolver) BookOneCreate(
 	input adapters.BookOneCreateInput,
 ) (res *adapters.BookOutput, err error) {
 	meta := r.metaContainer.Get(domain.Book{}.Name())
-	fields := infrastructure.ParseSelectionSet(ctx, meta)
+	fields := infrastructure.GetPreloads(ctx, meta)
 
 	ent, err := r.services.Book.CreateOne(ctx, input.ToEntity(), fields)
 	if err != nil {
@@ -29,7 +29,7 @@ func (r *mutationResolver) BookOneUpdate(
 	input adapters.BookOneUpdateInput,
 ) (res *adapters.BookOutput, err error) {
 	meta := r.metaContainer.Get(domain.Book{}.Name())
-	fields := infrastructure.ParseSelectionSet(ctx, meta)
+	fields := infrastructure.GetPreloads(ctx, meta)
 	ftu := infrastructure.ParseInputFields(ctx, nil)
 
 	ent, err := r.services.Book.UpdateOne(ctx, input.ToEntity(), fields, meta.PresenterSetToPersistenceSet(ftu))

@@ -13,7 +13,7 @@ type BookService interface {
 		spec dataset.CompositeSpecifier,
 	) (*domain.Book, error)
 
-	FindAll(
+	FindPage(
 		ctx context.Context,
 		fields []string,
 		spec dataset.CompositeSpecifier,

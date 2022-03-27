@@ -1,6 +1,6 @@
 type Query{
     bookOne(filter: BookFilter!): Book!
-    bookAll(filter: BookFilter, page: Page, sort: BookSort): BookPage!
+    bookPage(filter: BookFilter, page: Page, sort: BookSort): BookPage!
 }
 
 type Mutation{

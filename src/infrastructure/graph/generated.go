@@ -89,8 +89,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		BookAll func(childComplexity int, filter *adapters.BookFilter, page *infrastructure.Page, sort *adapters.BookSort) int
-		BookOne func(childComplexity int, filter adapters.BookFilter) int
+		BookOne  func(childComplexity int, filter adapters.BookFilter) int
+		BookPage func(childComplexity int, filter *adapters.BookFilter, page *infrastructure.Page, sort *adapters.BookSort) int
 	}
 }
 
@@ -101,7 +101,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	BookOne(ctx context.Context, filter adapters.BookFilter) (*adapters.BookOutput, error)
-	BookAll(ctx context.Context, filter *adapters.BookFilter, page *infrastructure.Page, sort *adapters.BookSort) (*adapters.BookPage, error)
+	BookPage(ctx context.Context, filter *adapters.BookFilter, page *infrastructure.Page, sort *adapters.BookSort) (*adapters.BookPage, error)
 }
 
 type executableSchema struct {
@@ -288,18 +288,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Price.Currency(childComplexity), true
 
-	case "Query.bookAll":
-		if e.complexity.Query.BookAll == nil {
-			break
-		}
-
-		args, err := ec.field_Query_bookAll_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.BookAll(childComplexity, args["filter"].(*adapters.BookFilter), args["page"].(*infrastructure.Page), args["sort"].(*adapters.BookSort)), true
-
 	case "Query.bookOne":
 		if e.complexity.Query.BookOne == nil {
 			break
@@ -311,6 +299,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.BookOne(childComplexity, args["filter"].(adapters.BookFilter)), true
+
+	case "Query.bookPage":
+		if e.complexity.Query.BookPage == nil {
+			break
+		}
+
+		args, err := ec.field_Query_bookPage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BookPage(childComplexity, args["filter"].(*adapters.BookFilter), args["page"].(*infrastructure.Page), args["sort"].(*adapters.BookSort)), true
 
 	}
 	return 0, false
@@ -450,7 +450,7 @@ input BookOneUpdateInput {
 	{Name: "presentation/graphql/order.graphql", Input: ``, BuiltIn: false},
 	{Name: "presentation/graphql/schema.graphql", Input: `type Query{
     bookOne(filter: BookFilter!): Book!
-    bookAll(filter: BookFilter, page: Page, sort: BookSort): BookPage!
+    bookPage(filter: BookFilter, page: Page, sort: BookSort): BookPage!
 }
 
 type Mutation{
@@ -563,7 +563,22 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_bookAll_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_bookOne_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 adapters.BookFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalNBookFilter2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_bookPage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *adapters.BookFilter
@@ -593,21 +608,6 @@ func (ec *executionContext) field_Query_bookAll_args(ctx context.Context, rawArg
 		}
 	}
 	args["sort"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_bookOne_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 adapters.BookFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNBookFilter2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg0
 	return args, nil
 }
 
@@ -1479,7 +1479,7 @@ func (ec *executionContext) _Query_bookOne(ctx context.Context, field graphql.Co
 	return ec.marshalNBook2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutput(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_bookAll(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_bookPage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1496,7 +1496,7 @@ func (ec *executionContext) _Query_bookAll(ctx context.Context, field graphql.Co
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_bookAll_args(ctx, rawArgs)
+	args, err := ec.field_Query_bookPage_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1504,7 +1504,7 @@ func (ec *executionContext) _Query_bookAll(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().BookAll(rctx, args["filter"].(*adapters.BookFilter), args["page"].(*infrastructure.Page), args["sort"].(*adapters.BookSort))
+		return ec.resolvers.Query().BookPage(rctx, args["filter"].(*adapters.BookFilter), args["page"].(*infrastructure.Page), args["sort"].(*adapters.BookSort))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3473,7 +3473,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "bookAll":
+		case "bookPage":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3482,7 +3482,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_bookAll(ctx, field)
+				res = ec._Query_bookPage(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

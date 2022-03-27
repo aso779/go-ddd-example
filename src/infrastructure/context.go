@@ -62,19 +62,6 @@ func ParseNodesSelectionSet(ctx context.Context, entCache metadata.Meta) (fields
 	return
 }
 
-func ParseSelectionSet(ctx context.Context, entCache metadata.Meta) (fields []string) {
-	//TODO optimize
-	possibleFields := entCache.PresenterPersistenceMapping()
-	requestedFields := graphql.CollectAllFields(ctx)
-	for _, field := range requestedFields {
-		if v, ok := possibleFields[field]; ok {
-			fields = append(fields, v)
-		}
-	}
-
-	return
-}
-
 func ParseSelectionFromField(field ast.Field, entCache metadata.Meta) (fields []string) {
 	//possibleFields, additionFields := Fields(ent)
 	requestedFields := make([]string, len(field.SelectionSet))

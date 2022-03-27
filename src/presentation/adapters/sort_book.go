@@ -19,7 +19,7 @@ func (r *BookSort) Build() dataset.Sorter {
 		}
 
 		if r.Title != nil {
-			sorter.Append("name", r.Title.String())
+			sorter.Append("title", r.Title.String())
 		}
 
 		if r.CreatedAt != nil {

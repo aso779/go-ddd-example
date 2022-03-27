@@ -35,14 +35,14 @@ func (r BookService) FindOne(
 	return r.bookRepo.CrudRepository.FindOne(ctx, nil, fields, spec)
 }
 
-func (r BookService) FindAll(
+func (r BookService) FindPage(
 	ctx context.Context,
 	fields []string,
 	spec dataset.CompositeSpecifier,
 	page dataset.Pager,
 	sort dataset.Sorter,
 ) (*[]domain.Book, error) {
-	return r.bookRepo.CrudRepository.FindAll(ctx, nil, fields, spec, page, sort)
+	return r.bookRepo.CrudRepository.FindPage(ctx, nil, fields, spec, page, sort)
 }
 
 func (r BookService) Count(
@@ -57,7 +57,7 @@ func (r BookService) CreateOne(
 	book *domain.Book,
 	fields []string,
 ) (*domain.Book, error) {
-	return r.bookRepo.CrudRepository.Create(ctx, nil, book, fields)
+	return r.bookRepo.CrudRepository.CreateOne(ctx, nil, book, fields)
 }
 
 func (r BookService) UpdateOne(
@@ -67,7 +67,7 @@ func (r BookService) UpdateOne(
 	ftu []string,
 ) (*domain.Book, error) {
 	//validate
-	ent, err := r.bookRepo.CrudRepository.FindOneById(ctx, nil, []string{"*"}, book.PrimaryKey())
+	ent, err := r.bookRepo.CrudRepository.FindOneByPk(ctx, nil, []string{"*"}, book.PrimaryKey())
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (r BookService) UpdateOne(
 	book.ToExistsEntity(ent)
 	//validate
 
-	return r.bookRepo.CrudRepository.Update(ctx, nil, ent, fields, ftu)
+	return r.bookRepo.CrudRepository.UpdateOne(ctx, nil, ent, fields, ftu)
 }
 
 func (r BookService) Delete(

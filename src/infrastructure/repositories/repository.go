@@ -42,8 +42,7 @@ func (r CrudRepository[E, T]) FindOne(
 	return &ent, err
 }
 
-//FindOneById TODO rename FindOneByPk
-func (r CrudRepository[E, T]) FindOneById(
+func (r CrudRepository[E, T]) FindOneByPk(
 	ctx context.Context,
 	tx bun.IDB,
 	fields []string,
@@ -58,6 +57,34 @@ func (r CrudRepository[E, T]) FindOneById(
 }
 
 func (r CrudRepository[E, T]) FindAll(
+	ctx context.Context,
+	tx bun.IDB,
+	fields []string,
+	spec dataset.Specifier,
+) (*[]E, error) {
+	var ents []E
+	if tx == nil {
+		tx = r.ConnSet.ReadPool()
+	}
+
+	query := tx.
+		NewSelect().
+		Model(&ents).
+		Column(fields...)
+	if spec != nil && !spec.IsEmpty() {
+		for _, j := range spec.Joins(r.Meta) {
+			query.Join(j)
+		}
+
+		query.Where(spec.Query(r.Meta), spec.Values()...)
+	}
+
+	err := query.Scan(ctx)
+
+	return &ents, err
+}
+
+func (r CrudRepository[E, T]) FindPage(
 	ctx context.Context,
 	tx bun.IDB,
 	fields []string,
@@ -84,7 +111,7 @@ func (r CrudRepository[E, T]) FindAll(
 		query.Where(spec.Query(r.Meta), spec.Values()...)
 	}
 	if page != nil && !page.IsEmpty() {
-		query.Limit(page.GetNumber())
+		query.Limit(page.GetSize())
 		query.Offset(page.GetOffset())
 	}
 	if sort != nil && !sort.IsEmpty() {
@@ -96,13 +123,15 @@ func (r CrudRepository[E, T]) FindAll(
 	return &ents, err
 }
 
-func (r CrudRepository[E, T]) FindAllByIds(
+func (r CrudRepository[E, T]) FindAllByPks(
 	ctx context.Context,
 	tx bun.IDB,
 	fields []string,
 	ids []metadata.PrimaryKey,
 ) (*[]E, error) {
-	return nil, nil
+	spec := dataspec.NewIn("id", ids)
+
+	return r.FindAll(ctx, tx, fields, spec)
 }
 
 func (r CrudRepository[E, T]) Count(
@@ -110,10 +139,27 @@ func (r CrudRepository[E, T]) Count(
 	tx bun.IDB,
 	spec dataset.Specifier,
 ) (int, error) {
-	return 0, nil
+	var ent E
+	if tx == nil {
+		tx = r.ConnSet.ReadPool()
+	}
+
+	query := tx.
+		NewSelect().
+		Model(&ent)
+
+	if spec != nil && !spec.IsEmpty() {
+		for _, j := range spec.Joins(r.Meta) {
+			query.Join(j)
+		}
+
+		query.Where(spec.Query(r.Meta), spec.Values()...)
+	}
+
+	return query.Count(ctx)
 }
 
-func (r CrudRepository[E, T]) Create(
+func (r CrudRepository[E, T]) CreateOne(
 	ctx context.Context,
 	tx bun.IDB,
 	ent *E,
@@ -122,7 +168,7 @@ func (r CrudRepository[E, T]) Create(
 	return nil, nil
 }
 
-func (r CrudRepository[E, T]) Update(
+func (r CrudRepository[E, T]) UpdateOne(
 	ctx context.Context,
 	tx bun.IDB,
 	ent *E,

@@ -24,14 +24,14 @@ func (r *queryResolver) BookOne(
 	return
 }
 
-func (r *queryResolver) BookAll(
+func (r *queryResolver) BookPage(
 	ctx context.Context,
 	filter *adapters.BookFilter,
 	page *infrastructure.Page,
 	sort *adapters.BookSort,
 ) (res *adapters.BookPage, err error) {
 	meta := r.metaContainer.Get(domain.Book{}.Name())
-	fields := infrastructure.ParseSelectionSet(ctx, meta)
+	fields := infrastructure.GetPreloads(ctx, meta)
 
 	spec := filter.Build()
 	sorter := sort.Build()
@@ -41,7 +41,7 @@ func (r *queryResolver) BookAll(
 		return
 	}
 
-	ents, err := r.services.Book.FindAll(ctx, fields, spec, page, sorter)
+	ents, err := r.services.Book.FindPage(ctx, fields, spec, page, sorter)
 	if err != nil {
 		return
 	}
