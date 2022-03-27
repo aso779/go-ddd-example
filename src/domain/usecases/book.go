@@ -25,4 +25,22 @@ type BookService interface {
 		ctx context.Context,
 		spec dataset.CompositeSpecifier,
 	) (int, error)
+
+	CreateOne(
+		ctx context.Context,
+		book *domain.Book,
+		fields []string,
+	) (*domain.Book, error)
+
+	UpdateOne(
+		ctx context.Context,
+		book *domain.Book,
+		fields []string,
+		ftu []string,
+	) (*domain.Book, error)
+
+	Delete(
+		ctx context.Context,
+		spec dataset.CompositeSpecifier,
+	) (int, error)
 }

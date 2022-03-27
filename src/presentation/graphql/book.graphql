@@ -1,10 +1,24 @@
 type Book {
     "id"
     id: Int!
+    "genreId"
+    genreId: Int!
     "title"
     title: String!
+    "description"
+    description: String!
+    "price"
+    price: Price!
+
     #    "genre"
     #    genre: Genre!
+}
+
+type Price {
+    "amount"
+    amount: Int!
+    "currency"
+    currency: String!
 }
 
 input BookFilter {
@@ -21,4 +35,16 @@ input BookSort {
 type BookPage {
     items: [Book!]!
     pageInfo: PageInfo
+}
+
+input BookOneCreateInput {
+    "title"
+    title: String!
+}
+
+input BookOneUpdateInput {
+    "id"
+    id: Int!
+    "title"
+    title: String
 }

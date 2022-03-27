@@ -7,10 +7,18 @@ import (
 )
 
 type BookOutput struct {
-	ID        int64     `json:"id"`
-	Title     string    `json:"title"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          int64     `json:"id"`
+	GenreID     int64     `json:"genreId"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Price       Price     `json:"price"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type Price struct {
+	Amount   int    `json:"amount"`
+	Currency string `json:"currency"`
 }
 
 func NewBook() *BookOutput {
@@ -19,8 +27,14 @@ func NewBook() *BookOutput {
 
 func (r *BookOutput) ToOutput(d *domain.Book) *BookOutput {
 	res := &BookOutput{
-		ID:        d.ID,
-		Title:     d.Title,
+		ID:          d.ID,
+		GenreID:     d.GenreID,
+		Title:       d.Title,
+		Description: d.Description,
+		Price: Price{
+			Amount:   int(d.Price.Amount),
+			Currency: d.Price.Currency,
+		},
 		CreatedAt: d.CreatedAt.In(time.Local),
 		UpdatedAt: d.UpdatedAt.In(time.Local),
 	}

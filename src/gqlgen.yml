@@ -13,8 +13,12 @@ models:
     model: ./presentation/adapters.BookFilter
   BookSort:
     model: ./presentation/adapters.BookSort
-  User:
-    model: ./presentation/adapters.UserOutput
+  BookOneCreateInput:
+    model: ./presentation/adapters.BookOneCreateInput
+  BookOneUpdateInput:
+    model: ./presentation/adapters.BookOneUpdateInput
+  Price:
+    model: ./presentation/adapters.Price
   Page:
     model: ./infrastructure.Page
   PageInfo:

@@ -12,7 +12,7 @@ func (r *queryResolver) BookOne(
 	filter adapters.BookFilter,
 ) (res *adapters.BookOutput, err error) {
 	meta := r.metaContainer.Get(domain.Book{}.Name())
-	fields := infrastructure.ParseSelectionSet(ctx, meta)
+	fields := infrastructure.GetPreloads(ctx, meta)
 
 	ent, err := r.services.Book.FindOne(ctx, fields, filter.Build())
 	if err != nil {

@@ -14,7 +14,7 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-require github.com/aso779/go-ddd v0.0.5
+require github.com/aso779/go-ddd v0.0.6
 
 require (
 	github.com/agnivade/levenshtein v1.1.0 // indirect

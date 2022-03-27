@@ -7,6 +7,42 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+func GetPreloads(ctx context.Context, meta metadata.Meta) []string {
+	requested := GetNestedPreloads(
+		graphql.GetOperationContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"",
+	)
+	available := meta.PresenterPersistenceMapping()
+	var fields []string
+	for _, field := range requested {
+		if v, ok := available[field]; ok {
+			fields = append(fields, v)
+		}
+	}
+	return fields
+}
+
+func GetNestedPreloads(
+	ctx *graphql.OperationContext,
+	fields []graphql.CollectedField,
+	prefix string,
+) (preloads []string) {
+	for _, column := range fields {
+		prefixColumn := GetPreloadString(prefix, column.Name)
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
+	}
+	return
+}
+
+func GetPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "_" + name
+	}
+	return name
+}
+
 func ParseNodesSelectionSet(ctx context.Context, entCache metadata.Meta) (fields []string) {
 	rootSet := graphql.CollectFieldsCtx(ctx, nil)
 	//TODO optimize

@@ -51,3 +51,36 @@ func (r BookService) Count(
 ) (int, error) {
 	return r.bookRepo.CrudRepository.Count(ctx, nil, spec)
 }
+
+func (r BookService) CreateOne(
+	ctx context.Context,
+	book *domain.Book,
+	fields []string,
+) (*domain.Book, error) {
+	return r.bookRepo.CrudRepository.Create(ctx, nil, book, fields)
+}
+
+func (r BookService) UpdateOne(
+	ctx context.Context,
+	book *domain.Book,
+	fields []string,
+	ftu []string,
+) (*domain.Book, error) {
+	//validate
+	ent, err := r.bookRepo.CrudRepository.FindOneById(ctx, nil, []string{"*"}, book.PrimaryKey())
+	if err != nil {
+		return nil, err
+	}
+
+	book.ToExistsEntity(ent)
+	//validate
+
+	return r.bookRepo.CrudRepository.Update(ctx, nil, ent, fields, ftu)
+}
+
+func (r BookService) Delete(
+	ctx context.Context,
+	spec dataset.CompositeSpecifier,
+) (int, error) {
+	return r.bookRepo.Delete(ctx, nil, spec)
+}

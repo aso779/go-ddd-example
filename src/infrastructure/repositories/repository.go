@@ -5,6 +5,7 @@ import (
 	"github.com/aso779/go-ddd-example/infrastructure/connection"
 	"github.com/aso779/go-ddd/domain/usecase/dataset"
 	"github.com/aso779/go-ddd/domain/usecase/metadata"
+	"github.com/aso779/go-ddd/infrastructure/dataspec"
 	"github.com/uptrace/bun"
 )
 
@@ -41,13 +42,19 @@ func (r CrudRepository[E, T]) FindOne(
 	return &ent, err
 }
 
+//FindOneById TODO rename FindOneByPk
 func (r CrudRepository[E, T]) FindOneById(
 	ctx context.Context,
 	tx bun.IDB,
 	fields []string,
-	id metadata.PrimaryKey,
+	pk metadata.PrimaryKey,
 ) (*E, error) {
-	return nil, nil
+	spec := dataspec.NewAnd()
+	for k, v := range pk {
+		spec.Append(dataspec.NewEqual(k, v))
+	}
+
+	return r.FindOne(ctx, tx, fields, spec)
 }
 
 func (r CrudRepository[E, T]) FindAll(

@@ -8,11 +8,18 @@ import (
 
 type Book struct {
 	bun.BaseModel `bun:"table:bks_books,alias:bks_books"`
-	ID            int64  `bun:"id,pk,autoincrement" json:"id"`
-	Title         string `bun:"title" json:"title"`
-	//GenreID       int       `bun:"genre_id" json:"genreId"`
-	CreatedAt time.Time `bun:"created_at" json:"createdAt"`
-	UpdatedAt time.Time `bun:"updated_at" json:"updatedAt"`
+	ID            int64     `bun:"id,pk,autoincrement" json:"id"`
+	GenreID       int64     `bun:"genre_id" json:"genreId"`
+	Title         string    `bun:"title" json:"title"`
+	Description   string    `bun:"description" json:"description"`
+	Price         Price     `bun:"embed:price_"`
+	CreatedAt     time.Time `bun:"created_at" json:"createdAt"`
+	UpdatedAt     time.Time `bun:"updated_at" json:"updatedAt"`
+}
+
+type Price struct {
+	Amount   uint64 `bun:"amount" json:"amount"`
+	Currency string `bun:"currency" json:"currency"`
 }
 
 func (r Book) Name() string {
@@ -21,4 +28,16 @@ func (r Book) Name() string {
 
 func (r Book) PrimaryKey() metadata.PrimaryKey {
 	return metadata.PrimaryKey{"id": r.ID}
+}
+
+func (r *Book) ToExistsEntity(exists *Book) {
+	if r.GenreID != 0 {
+		exists.GenreID = r.GenreID
+	}
+	if r.Title != "" {
+		exists.Title = r.Title
+	}
+	if r.Description != "" {
+		exists.Description = r.Description
+	}
 }

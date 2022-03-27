@@ -4,8 +4,8 @@ type Query{
 }
 
 type Mutation{
-#    bookCreate(input: BookCreateInput!): Book!
-#    bookOneUpdate(input: BookUpdateInput!): Book!
+    bookOneCreate(input: BookOneCreateInput!): Book!
+    bookOneUpdate(input: BookOneUpdateInput!): Book!
     bookDelete(filter: BookFilter!): Int!
 }
 
