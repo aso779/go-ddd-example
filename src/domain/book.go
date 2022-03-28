@@ -15,6 +15,7 @@ type Book struct {
 	Price         Price     `bun:"embed:price_"`
 	CreatedAt     time.Time `bun:"created_at" json:"createdAt"`
 	UpdatedAt     time.Time `bun:"updated_at" json:"updatedAt"`
+	DeletedAt     time.Time `bun:",soft_delete,nullzero"`
 }
 
 type Price struct {
@@ -40,4 +41,6 @@ func (r *Book) ToExistsEntity(exists *Book) {
 	if r.Description != "" {
 		exists.Description = r.Description
 	}
+	exists.Price.Amount = r.Price.Amount
+	exists.Price.Currency = r.Price.Currency
 }

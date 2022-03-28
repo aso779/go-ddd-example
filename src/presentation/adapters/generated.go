@@ -49,6 +49,13 @@ type IntFilter struct {
 	In []int `json:"in"`
 }
 
+type PriceInput struct {
+	// amount
+	Amount int `json:"amount"`
+	// currency
+	Currency string `json:"currency"`
+}
+
 type TextFilter struct {
 	Search        string `json:"search"`
 	CaseSensitive bool   `json:"caseSensitive"`

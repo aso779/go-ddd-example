@@ -1,13 +1,27 @@
 package adapters
 
-import "github.com/aso779/go-ddd-example/domain"
+import (
+	"github.com/aso779/go-ddd-example/domain"
+	"time"
+)
 
 type BookOneCreateInput struct {
-	Title string `json:"title"`
+	GenreID     int64      `json:"genreId"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Price       PriceInput `json:"price"`
 }
 
 func (r *BookOneCreateInput) ToEntity() *domain.Book {
 	return &domain.Book{
-		Title: r.Title,
+		GenreID:     r.GenreID,
+		Title:       r.Title,
+		Description: r.Description,
+		Price: domain.Price{
+			Amount:   uint64(r.Price.Amount),
+			Currency: r.Price.Currency,
+		},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 }

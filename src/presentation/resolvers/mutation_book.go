@@ -30,7 +30,7 @@ func (r *mutationResolver) BookOneUpdate(
 ) (res *adapters.BookOutput, err error) {
 	meta := r.metaContainer.Get(domain.Book{}.Name())
 	fields := infrastructure.GetPreloads(ctx, meta)
-	ftu := infrastructure.ParseInputFields(ctx, nil)
+	ftu := infrastructure.ParseInputFields(ctx)
 
 	ent, err := r.services.Book.UpdateOne(ctx, input.ToEntity(), fields, meta.PresenterSetToPersistenceSet(ftu))
 	if err != nil {

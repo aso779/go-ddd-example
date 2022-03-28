@@ -7,6 +7,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"github.com/uptrace/bun/extra/bundebug"
 	"go.uber.org/zap"
 	"time"
 )
@@ -114,5 +115,9 @@ func (r *ConnSet) connect(config config.Postgres) *bun.DB {
 		pgdriver.WithWriteTimeout(5*time.Second),
 	)
 
-	return bun.NewDB(sql.OpenDB(conn), pgdialect.New())
+	db := bun.NewDB(sql.OpenDB(conn), pgdialect.New())
+
+	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
+
+	return db
 }

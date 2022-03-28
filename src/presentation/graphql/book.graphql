@@ -38,13 +38,32 @@ type BookPage {
 }
 
 input BookOneCreateInput {
+    "genreId"
+    genreId: Int!
     "title"
     title: String!
+    "description"
+    description: String
+    "price"
+    price: PriceInput!
+}
+
+input PriceInput {
+    "amount"
+    amount: Int!
+    "currency"
+    currency: String!
 }
 
 input BookOneUpdateInput {
     "id"
     id: Int!
+    "genreId"
+    genreId: Int
     "title"
     title: String
+    "description"
+    description: String
+    "price"
+    price: PriceInput
 }

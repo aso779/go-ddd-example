@@ -425,17 +425,35 @@ type BookPage {
 }
 
 input BookOneCreateInput {
+    "genreId"
+    genreId: Int!
     "title"
     title: String!
+    "description"
+    description: String
+    "price"
+    price: PriceInput!
+}
+
+input PriceInput {
+    "amount"
+    amount: Int!
+    "currency"
+    currency: String!
 }
 
 input BookOneUpdateInput {
     "id"
     id: Int!
+    "genreId"
+    genreId: Int
     "title"
     title: String
+    "description"
+    description: String
+    "price"
+    price: PriceInput
 }`, BuiltIn: false},
-	{Name: "presentation/graphql/comment.graphql", Input: ``, BuiltIn: false},
 	{Name: "presentation/graphql/genre.graphql", Input: `type Genre {
     "id"
     id: Int!
@@ -447,7 +465,6 @@ input BookOneUpdateInput {
     "subgenres"
     subgenres: [Genre]!
 }`, BuiltIn: false},
-	{Name: "presentation/graphql/order.graphql", Input: ``, BuiltIn: false},
 	{Name: "presentation/graphql/schema.graphql", Input: `type Query{
     bookOne(filter: BookFilter!): Book!
     bookPage(filter: BookFilter, page: Page, sort: BookSort): BookPage!
@@ -495,7 +512,6 @@ enum SortDirection {
     desc
     none
 }`, BuiltIn: false},
-	{Name: "presentation/graphql/user.graphql", Input: ``, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -2818,11 +2834,35 @@ func (ec *executionContext) unmarshalInputBookOneCreateInput(ctx context.Context
 
 	for k, v := range asMap {
 		switch k {
+		case "genreId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			it.GenreID, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
 			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "price":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
+			it.Price, err = ec.unmarshalNPriceInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPriceInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2849,11 +2889,35 @@ func (ec *executionContext) unmarshalInputBookOneUpdateInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
+		case "genreId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+			it.GenreID, err = ec.unmarshalOInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Title, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "price":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
+			it.Price, err = ec.unmarshalOPriceInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPriceInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3010,6 +3074,37 @@ func (ec *executionContext) unmarshalInputPage(ctx context.Context, obj interfac
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("number"))
 			it.Number, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPriceInput(ctx context.Context, obj interface{}) (adapters.PriceInput, error) {
+	var it adapters.PriceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "amount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			it.Amount, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "currency":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			it.Currency, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4156,6 +4251,11 @@ func (ec *executionContext) marshalNPrice2githubᚗcomᚋaso779ᚋgoᚑdddᚑexa
 	return ec._Price(ctx, sel, &v)
 }
 
+func (ec *executionContext) unmarshalNPriceInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPriceInput(ctx context.Context, v interface{}) (adapters.PriceInput, error) {
+	res, err := ec.unmarshalInputPriceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4480,6 +4580,16 @@ func (ec *executionContext) marshalOGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑ
 	return ec._Genre(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	res := graphql.MarshalInt64(v)
+	return res
+}
+
 func (ec *executionContext) unmarshalOInt2ᚕintᚄ(ctx context.Context, v interface{}) ([]int, error) {
 	if v == nil {
 		return nil, nil
@@ -4557,6 +4667,11 @@ func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋaso779ᚋgoᚑddd
 	return ec._PageInfo(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOPriceInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPriceInput(ctx context.Context, v interface{}) (adapters.PriceInput, error) {
+	res, err := ec.unmarshalInputPriceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOSortDirection2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐSortDirection(ctx context.Context, v interface{}) (*adapters.SortDirection, error) {
 	if v == nil {
 		return nil, nil
@@ -4571,6 +4686,16 @@ func (ec *executionContext) marshalOSortDirection2ᚖgithubᚗcomᚋaso779ᚋgo�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

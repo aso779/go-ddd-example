@@ -7,6 +7,7 @@ import (
 	"github.com/aso779/go-ddd/domain/usecase/metadata"
 	"github.com/aso779/go-ddd/infrastructure/dataspec"
 	"github.com/uptrace/bun"
+	"strings"
 )
 
 type CrudRepository[E metadata.Entity, T bun.Tx] struct {
@@ -165,7 +166,16 @@ func (r CrudRepository[E, T]) CreateOne(
 	ent *E,
 	fields []string,
 ) (*E, error) {
-	return nil, nil
+	if tx == nil {
+		tx = r.ConnSet.WritePool()
+	}
+
+	_, err := tx.NewInsert().
+		Model(ent).
+		Returning(strings.Join(fields, ",")).
+		Exec(ctx)
+
+	return ent, err
 }
 
 func (r CrudRepository[E, T]) UpdateOne(
@@ -175,7 +185,18 @@ func (r CrudRepository[E, T]) UpdateOne(
 	fields []string,
 	ftu []string,
 ) (*E, error) {
-	return nil, nil
+	if tx == nil {
+		tx = r.ConnSet.WritePool()
+	}
+
+	_, err := tx.NewUpdate().
+		Model(ent).
+		Column(ftu...).
+		WherePK().
+		Returning(strings.Join(fields, ",")).
+		Exec(ctx)
+
+	return ent, err
 }
 
 func (r CrudRepository[E, T]) Delete(
@@ -183,5 +204,23 @@ func (r CrudRepository[E, T]) Delete(
 	tx bun.IDB,
 	spec dataset.Specifier,
 ) (int, error) {
-	return 0, nil
+	var ent E
+	if tx == nil {
+		tx = r.ConnSet.WritePool()
+	}
+
+	query := tx.NewDelete().
+		Model(&ent)
+	if spec != nil && !spec.IsEmpty() {
+		query.Where(spec.Query(r.Meta), spec.Values()...)
+	}
+
+	res, err := query.Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	rows, err := res.RowsAffected()
+
+	return int(rows), err
 }
