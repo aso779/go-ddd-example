@@ -19,7 +19,15 @@ models:
     model: ./presentation/adapters.BookOneUpdateInput
   Price:
     model: ./presentation/adapters.Price
+  Genre:
+    model: ./presentation/adapters.GenreOutput
   Page:
     model: ./infrastructure.Page
   PageInfo:
     model: ./infrastructure.PageInfo
+
+resolver:
+  filename: ./presentation/resolvers/resolver.go
+  type: Resolver
+
+autobind: [ ]

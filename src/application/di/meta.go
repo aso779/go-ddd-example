@@ -90,6 +90,7 @@ var parser = func(decorator metadata.EntityMetaDecorator) metadata.Meta {
 func NewEntities() metadata.EntityMetaContainer {
 	c := entmeta.NewContainer()
 	c.Add(meta.BookMeta{}, parser)
+	c.Add(meta.GenreMeta{}, parser)
 
 	return c
 }

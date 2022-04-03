@@ -45,18 +45,15 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Author struct {
-		Books func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
-	}
-
 	Book struct {
+		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
+		Genre       func(childComplexity int) int
 		GenreID     func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Price       func(childComplexity int) int
 		Title       func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 
 	BookPage struct {
@@ -65,10 +62,10 @@ type ComplexityRoot struct {
 	}
 
 	Genre struct {
+		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		ParentID  func(childComplexity int) int
-		Subgenres func(childComplexity int) int
+		Title     func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -119,26 +116,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Author.books":
-		if e.complexity.Author.Books == nil {
+	case "Book.createdAt":
+		if e.complexity.Book.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Author.Books(childComplexity), true
-
-	case "Author.id":
-		if e.complexity.Author.ID == nil {
-			break
-		}
-
-		return e.complexity.Author.ID(childComplexity), true
-
-	case "Author.name":
-		if e.complexity.Author.Name == nil {
-			break
-		}
-
-		return e.complexity.Author.Name(childComplexity), true
+		return e.complexity.Book.CreatedAt(childComplexity), true
 
 	case "Book.description":
 		if e.complexity.Book.Description == nil {
@@ -146,6 +129,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Book.Description(childComplexity), true
+
+	case "Book.genre":
+		if e.complexity.Book.Genre == nil {
+			break
+		}
+
+		return e.complexity.Book.Genre(childComplexity), true
 
 	case "Book.genreId":
 		if e.complexity.Book.GenreID == nil {
@@ -175,6 +165,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Book.Title(childComplexity), true
 
+	case "Book.updatedAt":
+		if e.complexity.Book.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Book.UpdatedAt(childComplexity), true
+
 	case "BookPage.items":
 		if e.complexity.BookPage.Items == nil {
 			break
@@ -189,6 +186,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BookPage.PageInfo(childComplexity), true
 
+	case "Genre.createdAt":
+		if e.complexity.Genre.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Genre.CreatedAt(childComplexity), true
+
 	case "Genre.id":
 		if e.complexity.Genre.ID == nil {
 			break
@@ -196,26 +200,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Genre.ID(childComplexity), true
 
-	case "Genre.name":
-		if e.complexity.Genre.Name == nil {
+	case "Genre.title":
+		if e.complexity.Genre.Title == nil {
 			break
 		}
 
-		return e.complexity.Genre.Name(childComplexity), true
+		return e.complexity.Genre.Title(childComplexity), true
 
-	case "Genre.parentId":
-		if e.complexity.Genre.ParentID == nil {
+	case "Genre.updatedAt":
+		if e.complexity.Genre.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.Genre.ParentID(childComplexity), true
-
-	case "Genre.subgenres":
-		if e.complexity.Genre.Subgenres == nil {
-			break
-		}
-
-		return e.complexity.Genre.Subgenres(childComplexity), true
+		return e.complexity.Genre.UpdatedAt(childComplexity), true
 
 	case "Mutation.bookDelete":
 		if e.complexity.Mutation.BookDelete == nil {
@@ -376,15 +373,6 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "presentation/graphql/author.graphql", Input: `type Author {
-    "id"
-    id: Int!
-    "name"
-    name: String!
-
-    "relation to books"
-    books: [Book]!
-}`, BuiltIn: false},
 	{Name: "presentation/graphql/book.graphql", Input: `type Book {
     "id"
     id: Int!
@@ -396,9 +384,13 @@ var sources = []*ast.Source{
     description: String!
     "price"
     price: Price!
+    "createdAt"
+    createdAt: Time!
+    "updatedAt"
+    updatedAt: Time!
 
-    #    "genre"
-    #    genre: Genre!
+    "relation to book genre"
+    genre: Genre!
 }
 
 type Price {
@@ -457,13 +449,12 @@ input BookOneUpdateInput {
 	{Name: "presentation/graphql/genre.graphql", Input: `type Genre {
     "id"
     id: Int!
-    "name"
-    name: String!
-    "parentId"
-    parentId: Int!
-
-    "subgenres"
-    subgenres: [Genre]!
+    "title"
+    title: String!
+    "createdAt"
+    createdAt: Time!
+    "updatedAt"
+    updatedAt: Time!
 }`, BuiltIn: false},
 	{Name: "presentation/graphql/schema.graphql", Input: `type Query{
     bookOne(filter: BookFilter!): Book!
@@ -665,111 +656,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Author_id(ctx context.Context, field graphql.CollectedField, obj *adapters.Author) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Author",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Author_name(ctx context.Context, field graphql.CollectedField, obj *adapters.Author) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Author",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Author_books(ctx context.Context, field graphql.CollectedField, obj *adapters.Author) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Author",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Books, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*adapters.BookOutput)
-	fc.Result = res
-	return ec.marshalNBook2ᚕᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutput(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Book_id(ctx context.Context, field graphql.CollectedField, obj *adapters.BookOutput) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -800,9 +686,9 @@ func (ec *executionContext) _Book_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int64)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Book_genreId(ctx context.Context, field graphql.CollectedField, obj *adapters.BookOutput) (ret graphql.Marshaler) {
@@ -835,9 +721,9 @@ func (ec *executionContext) _Book_genreId(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int64)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Book_title(ctx context.Context, field graphql.CollectedField, obj *adapters.BookOutput) (ret graphql.Marshaler) {
@@ -945,6 +831,111 @@ func (ec *executionContext) _Book_price(ctx context.Context, field graphql.Colle
 	return ec.marshalNPrice2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPrice(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Book_createdAt(ctx context.Context, field graphql.CollectedField, obj *adapters.BookOutput) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Book_updatedAt(ctx context.Context, field graphql.CollectedField, obj *adapters.BookOutput) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Book_genre(ctx context.Context, field graphql.CollectedField, obj *adapters.BookOutput) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Genre(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*adapters.GenreOutput)
+	fc.Result = res
+	return ec.marshalNGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOutput(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _BookPage_items(ctx context.Context, field graphql.CollectedField, obj *adapters.BookPage) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1012,7 +1003,7 @@ func (ec *executionContext) _BookPage_pageInfo(ctx context.Context, field graphq
 	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋinfrastructureᚐPageInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Genre_id(ctx context.Context, field graphql.CollectedField, obj *adapters.Genre) (ret graphql.Marshaler) {
+func (ec *executionContext) _Genre_id(ctx context.Context, field graphql.CollectedField, obj *adapters.GenreOutput) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1047,7 +1038,7 @@ func (ec *executionContext) _Genre_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Genre_name(ctx context.Context, field graphql.CollectedField, obj *adapters.Genre) (ret graphql.Marshaler) {
+func (ec *executionContext) _Genre_title(ctx context.Context, field graphql.CollectedField, obj *adapters.GenreOutput) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1065,7 +1056,7 @@ func (ec *executionContext) _Genre_name(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.Title, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1082,7 +1073,7 @@ func (ec *executionContext) _Genre_name(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Genre_parentId(ctx context.Context, field graphql.CollectedField, obj *adapters.Genre) (ret graphql.Marshaler) {
+func (ec *executionContext) _Genre_createdAt(ctx context.Context, field graphql.CollectedField, obj *adapters.GenreOutput) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1100,7 +1091,7 @@ func (ec *executionContext) _Genre_parentId(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ParentID, nil
+		return obj.CreatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1112,12 +1103,12 @@ func (ec *executionContext) _Genre_parentId(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Genre_subgenres(ctx context.Context, field graphql.CollectedField, obj *adapters.Genre) (ret graphql.Marshaler) {
+func (ec *executionContext) _Genre_updatedAt(ctx context.Context, field graphql.CollectedField, obj *adapters.GenreOutput) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1135,7 +1126,7 @@ func (ec *executionContext) _Genre_subgenres(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Subgenres, nil
+		return obj.UpdatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1147,9 +1138,9 @@ func (ec *executionContext) _Genre_subgenres(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*adapters.Genre)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNGenre2ᚕᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenre(ctx, field.Selections, res)
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_bookOneCreate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2838,7 +2829,7 @@ func (ec *executionContext) unmarshalInputBookOneCreateInput(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
-			it.GenreID, err = ec.unmarshalNInt2int64(ctx, v)
+			it.GenreID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2893,7 +2884,7 @@ func (ec *executionContext) unmarshalInputBookOneUpdateInput(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
-			it.GenreID, err = ec.unmarshalOInt2int64(ctx, v)
+			it.GenreID, err = ec.unmarshalOInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3153,57 +3144,6 @@ func (ec *executionContext) unmarshalInputTextFilter(ctx context.Context, obj in
 
 // region    **************************** object.gotpl ****************************
 
-var authorImplementors = []string{"Author"}
-
-func (ec *executionContext) _Author(ctx context.Context, sel ast.SelectionSet, obj *adapters.Author) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, authorImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Author")
-		case "id":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Author_id(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Author_name(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "books":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Author_books(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var bookImplementors = []string{"Book"}
 
 func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj *adapters.BookOutput) graphql.Marshaler {
@@ -3222,7 +3162,7 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "genreId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3232,7 +3172,7 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "title":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3242,7 +3182,7 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "description":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3252,7 +3192,7 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "price":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3262,8 +3202,48 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "createdAt":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Book_createdAt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "updatedAt":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Book_updatedAt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "genre":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Book_genre(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3315,7 +3295,7 @@ func (ec *executionContext) _BookPage(ctx context.Context, sel ast.SelectionSet,
 
 var genreImplementors = []string{"Genre"}
 
-func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, obj *adapters.Genre) graphql.Marshaler {
+func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, obj *adapters.GenreOutput) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, genreImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -3333,9 +3313,9 @@ func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "name":
+		case "title":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Genre_name(ctx, field, obj)
+				return ec._Genre_title(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -3343,9 +3323,9 @@ func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "parentId":
+		case "createdAt":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Genre_parentId(ctx, field, obj)
+				return ec._Genre_createdAt(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -3353,9 +3333,9 @@ func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "subgenres":
+		case "updatedAt":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Genre_subgenres(ctx, field, obj)
+				return ec._Genre_updatedAt(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -4043,44 +4023,6 @@ func (ec *executionContext) marshalNBook2githubᚗcomᚋaso779ᚋgoᚑdddᚑexam
 	return ec._Book(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNBook2ᚕᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutput(ctx context.Context, sel ast.SelectionSet, v []*adapters.BookOutput) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOBook2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutput(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
 func (ec *executionContext) marshalNBook2ᚕᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutputᚄ(ctx context.Context, sel ast.SelectionSet, v []*adapters.BookOutput) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -4179,42 +4121,14 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNGenre2ᚕᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenre(ctx context.Context, sel ast.SelectionSet, v []*adapters.Genre) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
+func (ec *executionContext) marshalNGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOutput(ctx context.Context, sel ast.SelectionSet, v *adapters.GenreOutput) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
 	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenre(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
+	return ec._Genre(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -4224,21 +4138,6 @@ func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}
 
 func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
 	res := graphql.MarshalInt(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
-	res, err := graphql.UnmarshalInt64(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
-	res := graphql.MarshalInt64(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4263,6 +4162,21 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := graphql.UnmarshalTime(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := graphql.MarshalTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4524,13 +4438,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOBook2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutput(ctx context.Context, sel ast.SelectionSet, v *adapters.BookOutput) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Book(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOBookFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookFilter(ctx context.Context, v interface{}) (*adapters.BookFilter, error) {
 	if v == nil {
 		return nil, nil
@@ -4573,20 +4480,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenre(ctx context.Context, sel ast.SelectionSet, v *adapters.Genre) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Genre(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {
-	res, err := graphql.UnmarshalInt64(v)
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
-	res := graphql.MarshalInt64(v)
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	return res
 }
 

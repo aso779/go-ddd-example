@@ -19,11 +19,13 @@ func BuildContainer() *dig.Container {
 	_ = c.Provide(config.NewConfig)
 	_ = c.Provide(chi.NewRouter)
 	_ = c.Provide(services.NewLogger)
-	_ = c.Provide(serv.NewAPIServer)
 	_ = c.Provide(resolvers.NewResolver)
 	_ = c.Provide(connection.NewPGConnSet)
-	_ = c.Provide(services.NewBook, dig.As(new(usecases.BookService)))
+	_ = c.Provide(serv.NewAPIServer)
 	_ = c.Provide(repositories.NewBook)
+	_ = c.Provide(services.NewBook, dig.As(new(usecases.BookService)))
+	_ = c.Provide(repositories.NewGenre)
+	_ = c.Provide(services.NewGenre, dig.As(new(usecases.GenreService)))
 
 	return c
 }

@@ -9,9 +9,13 @@ type Book {
     description: String!
     "price"
     price: Price!
+    "createdAt"
+    createdAt: Time!
+    "updatedAt"
+    updatedAt: Time!
 
-    #    "genre"
-    #    genre: Genre!
+    "relation to book genre"
+    genre: Genre!
 }
 
 type Price {

@@ -1,19 +1,22 @@
 package adapters
 
 import (
+	"context"
 	"github.com/aso779/go-ddd-example/domain"
 	"github.com/aso779/go-ddd-example/infrastructure"
 	"time"
 )
 
 type BookOutput struct {
-	ID          int64     `json:"id"`
-	GenreID     int64     `json:"genreId"`
+	ID          int       `json:"id"`
+	GenreID     int       `json:"genreId"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Price       Price     `json:"price"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+
+	relations BookRelations
 }
 
 type Price struct {
@@ -21,8 +24,16 @@ type Price struct {
 	Currency string `json:"currency"`
 }
 
-func NewBook() *BookOutput {
-	return &BookOutput{}
+func NewBook(relations BookRelations) *BookOutput {
+	return &BookOutput{relations: relations}
+}
+
+type BookRelations interface {
+	Genre(ctx context.Context, genreId int) (res *GenreOutput, err error)
+}
+
+func (r *BookOutput) Genre(ctx context.Context) (res *GenreOutput, err error) {
+	return r.relations.Genre(ctx, r.GenreID)
 }
 
 func (r *BookOutput) ToOutput(d *domain.Book) *BookOutput {
@@ -37,6 +48,8 @@ func (r *BookOutput) ToOutput(d *domain.Book) *BookOutput {
 		},
 		CreatedAt: d.CreatedAt.In(time.Local),
 		UpdatedAt: d.UpdatedAt.In(time.Local),
+
+		relations: r.relations,
 	}
 
 	return res

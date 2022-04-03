@@ -124,13 +124,13 @@ func (r CrudRepository[E, T]) FindPage(
 	return &ents, err
 }
 
-func (r CrudRepository[E, T]) FindAllByPks(
+func (r CrudRepository[E, T]) FindAllByIds(
 	ctx context.Context,
 	tx bun.IDB,
 	fields []string,
-	ids []metadata.PrimaryKey,
+	ids []int,
 ) (*[]E, error) {
-	spec := dataspec.NewIn("id", ids)
+	spec := dataspec.NewIn("id", bun.In(ids))
 
 	return r.FindAll(ctx, tx, fields, spec)
 }

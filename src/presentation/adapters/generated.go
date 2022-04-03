@@ -11,15 +11,6 @@ import (
 	"github.com/aso779/go-ddd-example/infrastructure"
 )
 
-type Author struct {
-	// id
-	ID int `json:"id"`
-	// name
-	Name string `json:"name"`
-	// relation to books
-	Books []*BookOutput `json:"books"`
-}
-
 type BookPage struct {
 	Items    []*BookOutput            `json:"items"`
 	PageInfo *infrastructure.PageInfo `json:"pageInfo"`
@@ -31,17 +22,6 @@ type DateFilter struct {
 	Gte *time.Time `json:"gte"`
 	Lt  *time.Time `json:"lt"`
 	Lte *time.Time `json:"lte"`
-}
-
-type Genre struct {
-	// id
-	ID int `json:"id"`
-	// name
-	Name string `json:"name"`
-	// parentId
-	ParentID int `json:"parentId"`
-	// subgenres
-	Subgenres []*Genre `json:"subgenres"`
 }
 
 type IntFilter struct {

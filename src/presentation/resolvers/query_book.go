@@ -19,7 +19,7 @@ func (r *queryResolver) BookOne(
 		return
 	}
 
-	res = adapters.NewBook().ToOutput(ent)
+	res = adapters.NewBook(NewBookRelations(r.metaContainer)).ToOutput(ent)
 
 	return
 }
@@ -49,7 +49,7 @@ func (r *queryResolver) BookPage(
 	opts := make([]*adapters.BookOutput, 0, len(*ents))
 
 	for _, v := range *ents {
-		opts = append(opts, adapters.NewBook().ToOutput(&v))
+		opts = append(opts, adapters.NewBook(NewBookRelations(r.metaContainer)).ToOutput(&v))
 	}
 	res = adapters.NewBookPage(opts, page, totalCount)
 

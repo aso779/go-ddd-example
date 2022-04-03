@@ -19,7 +19,7 @@ func (r *mutationResolver) BookOneCreate(
 		return
 	}
 
-	res = adapters.NewBook().ToOutput(ent)
+	res = adapters.NewBook(NewBookRelations(r.metaContainer)).ToOutput(ent)
 
 	return
 }
@@ -37,7 +37,7 @@ func (r *mutationResolver) BookOneUpdate(
 		return
 	}
 
-	res = adapters.NewBook().ToOutput(ent)
+	res = adapters.NewBook(NewBookRelations(r.metaContainer)).ToOutput(ent)
 
 	return
 }

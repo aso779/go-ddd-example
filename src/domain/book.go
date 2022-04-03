@@ -8,8 +8,8 @@ import (
 
 type Book struct {
 	bun.BaseModel `bun:"table:bks_books,alias:bks_books"`
-	ID            int64     `bun:"id,pk,autoincrement" json:"id"`
-	GenreID       int64     `bun:"genre_id" json:"genreId"`
+	ID            int       `bun:"id,pk,autoincrement" json:"id"`
+	GenreID       int       `bun:"genre_id" json:"genreId"`
 	Title         string    `bun:"title" json:"title"`
 	Description   string    `bun:"description" json:"description"`
 	Price         Price     `bun:"embed:price_"`
@@ -19,7 +19,7 @@ type Book struct {
 }
 
 type Price struct {
-	Amount   uint64 `bun:"amount" json:"amount"`
+	Amount   uint   `bun:"amount" json:"amount"`
 	Currency string `bun:"currency" json:"currency"`
 }
 
