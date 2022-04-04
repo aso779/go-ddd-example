@@ -8,6 +8,7 @@ import (
 type ServiceContainer struct {
 	dig.In
 
-	Book  usecases.BookService
-	Genre usecases.GenreService
+	Book   usecases.BookService
+	Genre  usecases.GenreService
+	Author usecases.AuthorService
 }

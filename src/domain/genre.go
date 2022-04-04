@@ -12,9 +12,10 @@ type Genre struct {
 	Title         string    `bun:"title" json:"title"`
 	CreatedAt     time.Time `bun:"created_at" json:"createdAt"`
 	UpdatedAt     time.Time `bun:"updated_at" json:"updatedAt"`
+	DeletedAt     time.Time `bun:",soft_delete,nullzero"`
 }
 
-func (r Genre) Name() string {
+func (r Genre) EntityName() string {
 	return "Genre"
 }
 

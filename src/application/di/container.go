@@ -26,6 +26,8 @@ func BuildContainer() *dig.Container {
 	_ = c.Provide(services.NewBook, dig.As(new(usecases.BookService)))
 	_ = c.Provide(repositories.NewGenre)
 	_ = c.Provide(services.NewGenre, dig.As(new(usecases.GenreService)))
+	_ = c.Provide(repositories.NewAuthor)
+	_ = c.Provide(services.NewAuthor, dig.As(new(usecases.AuthorService)))
 
 	return c
 }

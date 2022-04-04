@@ -30,10 +30,15 @@ func NewBook(relations BookRelations) *BookOutput {
 
 type BookRelations interface {
 	Genre(ctx context.Context, genreId int) (res *GenreOutput, err error)
+	Authors(ctx context.Context, bookId int) (res []AuthorOutput, err error)
 }
 
 func (r *BookOutput) Genre(ctx context.Context) (res *GenreOutput, err error) {
 	return r.relations.Genre(ctx, r.GenreID)
+}
+
+func (r *BookOutput) Authors(ctx context.Context) (res []AuthorOutput, err error) {
+	return r.relations.Authors(ctx, r.ID)
 }
 
 func (r *BookOutput) ToOutput(d *domain.Book) *BookOutput {

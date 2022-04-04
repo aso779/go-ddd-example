@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-type LoaderConfig[E any] struct {
-	//TODO keys generic
-
+type LoaderOneConfig[E any] struct {
 	// Fetch is a method that provides the data for the loader
 	Fetch func(keys []int, fields []string) ([]*E, []error)
 
@@ -18,17 +16,17 @@ type LoaderConfig[E any] struct {
 	MaxBatch int
 }
 
-// NewLoader creates a new Loader given a fetch, wait, and maxBatch
-func NewLoader[E any](config LoaderConfig[E]) *Loader[E] {
-	return &Loader[E]{
+// NewLoader creates a new LoaderOne given a fetch, wait, and maxBatch
+func NewLoader[E any](config LoaderOneConfig[E]) *LoaderOne[E] {
+	return &LoaderOne[E]{
 		fetch:    config.Fetch,
 		wait:     config.Wait,
 		maxBatch: config.MaxBatch,
 	}
 }
 
-// Loader batches and caches requests
-type Loader[E any] struct {
+// LoaderOne batches and caches requests
+type LoaderOne[E any] struct {
 	// this method provides the data for the loader
 	fetch func(keys []int, fields []string) ([]*E, []error)
 
@@ -45,13 +43,13 @@ type Loader[E any] struct {
 
 	// the current batch. keys will continue to be collected until timeout is hit,
 	// then everything will be sent to the fetch method and out to the listeners
-	batch *loaderBatch[E]
+	batch *loaderOneBatch[E]
 
 	// mutex to prevent races
 	mu sync.Mutex
 }
 
-type loaderBatch[E any] struct {
+type loaderOneBatch[E any] struct {
 	keys    []int
 	fields  []string
 	data    []*E
@@ -61,14 +59,14 @@ type loaderBatch[E any] struct {
 }
 
 // Load a ProductOutput by key, batching and caching will be applied automatically
-func (l *Loader[E]) Load(key int, fields []string) (*E, error) {
+func (l *LoaderOne[E]) Load(key int, fields []string) (*E, error) {
 	return l.LoadThunk(key, fields)()
 }
 
 // LoadThunk returns a function that when called will block waiting for a ProductOutput.
 // This method should be used if you want one goroutine to make requests to many
 // different data loaders without blocking until the thunk is called.
-func (l *Loader[E]) LoadThunk(key int, fields []string) func() (*E, error) {
+func (l *LoaderOne[E]) LoadThunk(key int, fields []string) func() (*E, error) {
 	l.mu.Lock()
 	if it, ok := l.cache[key]; ok {
 		l.mu.Unlock()
@@ -77,7 +75,7 @@ func (l *Loader[E]) LoadThunk(key int, fields []string) func() (*E, error) {
 		}
 	}
 	if l.batch == nil {
-		l.batch = &loaderBatch[E]{
+		l.batch = &loaderOneBatch[E]{
 			done:   make(chan struct{}),
 			fields: fields,
 		}
@@ -114,7 +112,7 @@ func (l *Loader[E]) LoadThunk(key int, fields []string) func() (*E, error) {
 
 // LoadAll fetches many keys at once. It will be broken into appropriate sized
 // sub batches depending on how the loader is configured
-func (l *Loader[E]) LoadAll(keys []int, fields []string) ([]*E, []error) {
+func (l *LoaderOne[E]) LoadAll(keys []int, fields []string) ([]*E, []error) {
 	results := make([]func() (*E, error), len(keys))
 
 	for i, key := range keys {
@@ -132,7 +130,7 @@ func (l *Loader[E]) LoadAll(keys []int, fields []string) ([]*E, []error) {
 // LoadAllThunk returns a function that when called will block waiting for a ProductOutput.
 // This method should be used if you want one goroutine to make requests to many
 // different data loaders without blocking until the thunk is called.
-func (l *Loader[E]) LoadAllThunk(keys []int, fields []string) func() ([]*E, []error) {
+func (l *LoaderOne[E]) LoadAllThunk(keys []int, fields []string) func() ([]*E, []error) {
 	results := make([]func() (*E, error), len(keys))
 	for i, key := range keys {
 		results[i] = l.LoadThunk(key, fields)
@@ -150,7 +148,7 @@ func (l *Loader[E]) LoadAllThunk(keys []int, fields []string) func() ([]*E, []er
 // Prime the cache with the provided key and value. If the key already exists, no change is made
 // and false is returned.
 // (To forcefully prime the cache, clear the key first with loader.clear(key).prime(key, value).)
-func (l *Loader[E]) Prime(key int, value *E) bool {
+func (l *LoaderOne[E]) Prime(key int, value *E) bool {
 	l.mu.Lock()
 	var found bool
 	if _, found = l.cache[key]; !found {
@@ -164,13 +162,13 @@ func (l *Loader[E]) Prime(key int, value *E) bool {
 }
 
 // Clear the value at key from the cache, if it exists
-func (l *Loader[E]) Clear(key int) {
+func (l *LoaderOne[E]) Clear(key int) {
 	l.mu.Lock()
 	delete(l.cache, key)
 	l.mu.Unlock()
 }
 
-func (l *Loader[E]) unsafeSet(key int, value *E) {
+func (l *LoaderOne[E]) unsafeSet(key int, value *E) {
 	if l.cache == nil {
 		l.cache = map[int]*E{}
 	}
@@ -179,7 +177,7 @@ func (l *Loader[E]) unsafeSet(key int, value *E) {
 
 // keyIndex will return the location of the key in the batch, if its not found
 // it will add the key to the batch
-func (b *loaderBatch[E]) keyIndex(l *Loader[E], key int) int {
+func (b *loaderOneBatch[E]) keyIndex(l *LoaderOne[E], key int) int {
 	for i, existingKey := range b.keys {
 		if key == existingKey {
 			return i
@@ -203,7 +201,7 @@ func (b *loaderBatch[E]) keyIndex(l *Loader[E], key int) int {
 	return pos
 }
 
-func (b *loaderBatch[E]) startTimer(l *Loader[E]) {
+func (b *loaderOneBatch[E]) startTimer(l *LoaderOne[E]) {
 	time.Sleep(l.wait)
 	l.mu.Lock()
 
@@ -219,7 +217,7 @@ func (b *loaderBatch[E]) startTimer(l *Loader[E]) {
 	b.end(l)
 }
 
-func (b *loaderBatch[E]) end(l *Loader[E]) {
+func (b *loaderOneBatch[E]) end(l *LoaderOne[E]) {
 	b.data, b.error = l.fetch(b.keys, b.fields)
 	close(b.done)
 }

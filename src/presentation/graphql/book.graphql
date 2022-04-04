@@ -16,6 +16,9 @@ type Book {
 
     "relation to book genre"
     genre: Genre!
+
+    "relation to book authors"
+    authors: [Author!]!
 }
 
 type Price {

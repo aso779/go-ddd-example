@@ -1,0 +1,10 @@
+type Author {
+    "id"
+    id: Int!
+    "name"
+    name: String!
+    "createdAt"
+    createdAt: Time!
+    "updatedAt"
+    updatedAt: Time!
+}

@@ -11,7 +11,7 @@ func (r *queryResolver) BookOne(
 	ctx context.Context,
 	filter adapters.BookFilter,
 ) (res *adapters.BookOutput, err error) {
-	meta := r.metaContainer.Get(domain.Book{}.Name())
+	meta := r.metaContainer.Get(domain.Book{}.EntityName())
 	fields := infrastructure.GetPreloads(ctx, meta)
 
 	ent, err := r.services.Book.FindOne(ctx, fields, filter.Build())
@@ -30,7 +30,7 @@ func (r *queryResolver) BookPage(
 	page *infrastructure.Page,
 	sort *adapters.BookSort,
 ) (res *adapters.BookPage, err error) {
-	meta := r.metaContainer.Get(domain.Book{}.Name())
+	meta := r.metaContainer.Get(domain.Book{}.EntityName())
 	fields := infrastructure.GetPreloads(ctx, meta)
 
 	spec := filter.Build()

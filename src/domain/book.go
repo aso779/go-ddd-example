@@ -23,7 +23,7 @@ type Price struct {
 	Currency string `bun:"currency" json:"currency"`
 }
 
-func (r Book) Name() string {
+func (r Book) EntityName() string {
 	return "Book"
 }
 

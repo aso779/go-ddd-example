@@ -18,5 +18,5 @@ func NewGenre(
 	return &GenreRepository{struct {
 		ConnSet *connection.ConnSet
 		Meta    metadata.Meta
-	}{ConnSet: connSet, Meta: c.Get(domain.Genre{}.Name())}}
+	}{ConnSet: connSet, Meta: c.Get(domain.Genre{}.EntityName())}}
 }

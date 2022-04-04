@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/99designs/gqlgen v0.17.2
-	github.com/aso779/go-ddd v0.0.7-0.20220327144632-aab0693153fa
+	github.com/aso779/go-ddd v0.0.10
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/uptrace/bun v1.1.2
 	github.com/uptrace/bun/dialect/pgdialect v1.1.2

@@ -18,5 +18,5 @@ func NewBook(
 	return &BookRepository{struct {
 		ConnSet *connection.ConnSet
 		Meta    metadata.Meta
-	}{ConnSet: connSet, Meta: c.Get(domain.Book{}.Name())}}
+	}{ConnSet: connSet, Meta: c.Get(domain.Book{}.EntityName())}}
 }

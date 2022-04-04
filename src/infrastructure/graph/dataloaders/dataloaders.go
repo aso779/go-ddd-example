@@ -11,7 +11,8 @@ import (
 const loadersKey = "dataloaders"
 
 type Loaders struct {
-	GenreByGenreId Loader[adapters.GenreOutput]
+	BookGenreByGenreId  LoaderOne[adapters.GenreOutput]
+	BookAuthorsByBookId LoaderMany[adapters.AuthorOutput]
 }
 
 type Dataloaders struct {
@@ -45,7 +46,7 @@ func For(ctx context.Context) *Loaders {
 
 func (r Dataloaders) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 	nextCtx := context.WithValue(ctx, loadersKey, &Loaders{
-		GenreByGenreId: Loader[adapters.GenreOutput]{
+		BookGenreByGenreId: LoaderOne[adapters.GenreOutput]{
 			maxBatch: 100,
 			wait:     1 * time.Millisecond,
 			fetch: func(ids []int, fields []string) ([]*adapters.GenreOutput, []error) {
@@ -63,6 +64,32 @@ func (r Dataloaders) InterceptOperation(ctx context.Context, next graphql.Operat
 				result := make([]*adapters.GenreOutput, len(ids))
 				for i, id := range ids {
 					result[i] = groupByGenreId[id]
+				}
+
+				return result, nil
+			},
+		},
+		BookAuthorsByBookId: LoaderMany[adapters.AuthorOutput]{
+			maxBatch: 100,
+			wait:     1 * time.Millisecond,
+			fetch: func(ids []int, fields []string) ([][]adapters.AuthorOutput, []error) {
+				// db query
+				res, err := r.services.Author.FindAllViaBookIds(ctx, fields, ids)
+				if err != nil {
+					return nil, []error{err}
+				}
+				// map
+				groupByBookId := make(map[int][]adapters.AuthorOutput, len(ids))
+				for _, v := range *res {
+					groupByBookId[v.BookID] = append(
+						groupByBookId[v.BookID],
+						*adapters.NewAuthor().FromProjectionBookId(&v),
+					)
+				}
+				// order
+				result := make([][]adapters.AuthorOutput, len(ids))
+				for i, bookId := range ids {
+					result[i] = groupByBookId[bookId]
 				}
 
 				return result, nil

@@ -11,7 +11,7 @@ func (r *mutationResolver) BookOneCreate(
 	ctx context.Context,
 	input adapters.BookOneCreateInput,
 ) (res *adapters.BookOutput, err error) {
-	meta := r.metaContainer.Get(domain.Book{}.Name())
+	meta := r.metaContainer.Get(domain.Book{}.EntityName())
 	fields := infrastructure.GetPreloads(ctx, meta)
 
 	ent, err := r.services.Book.CreateOne(ctx, input.ToEntity(), fields)
@@ -28,7 +28,7 @@ func (r *mutationResolver) BookOneUpdate(
 	ctx context.Context,
 	input adapters.BookOneUpdateInput,
 ) (res *adapters.BookOutput, err error) {
-	meta := r.metaContainer.Get(domain.Book{}.Name())
+	meta := r.metaContainer.Get(domain.Book{}.EntityName())
 	fields := infrastructure.GetPreloads(ctx, meta)
 	ftu := infrastructure.ParseInputFields(ctx)
 
