@@ -31,6 +31,9 @@ type Price {
 input BookFilter {
     id: IntFilter
     title: TextFilter
+    createdAt: DateFilter
+    author: AuthorFilter
+    genre: GenreFilter
 }
 
 input BookSort {

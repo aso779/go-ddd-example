@@ -21,8 +21,12 @@ models:
     model: ./presentation/adapters.Price
   Genre:
     model: ./presentation/adapters.GenreOutput
+  GenreFilter:
+    model: ./presentation/adapters.GenreFilter
   Author:
     model: ./presentation/adapters.AuthorOutput
+  AuthorFilter:
+    model: ./presentation/adapters.AuthorFilter
   Page:
     model: ./infrastructure.Page
   PageInfo:

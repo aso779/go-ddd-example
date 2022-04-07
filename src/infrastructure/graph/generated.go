@@ -425,6 +425,13 @@ var sources = []*ast.Source{
     createdAt: Time!
     "updatedAt"
     updatedAt: Time!
+}
+
+input AuthorFilter {
+    "id"
+    id: IntFilter
+    "name"
+    name: TextFilter
 }`, BuiltIn: false},
 	{Name: "presentation/graphql/book.graphql", Input: `type Book {
     "id"
@@ -459,6 +466,9 @@ type Price {
 input BookFilter {
     id: IntFilter
     title: TextFilter
+    createdAt: DateFilter
+    author: AuthorFilter
+    genre: GenreFilter
 }
 
 input BookSort {
@@ -511,6 +521,13 @@ input BookOneUpdateInput {
     createdAt: Time!
     "updatedAt"
     updatedAt: Time!
+}
+
+input GenreFilter {
+    "id"
+    id: IntFilter
+    "title"
+    title: TextFilter
 }`, BuiltIn: false},
 	{Name: "presentation/graphql/schema.graphql", Input: `type Query{
     bookOne(filter: BookFilter!): Book!
@@ -3016,6 +3033,37 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAuthorFilter(ctx context.Context, obj interface{}) (adapters.AuthorFilter, error) {
+	var it adapters.AuthorFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOIntFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐIntFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOTextFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐTextFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBookFilter(ctx context.Context, obj interface{}) (adapters.BookFilter, error) {
 	var it adapters.BookFilter
 	asMap := map[string]interface{}{}
@@ -3038,6 +3086,30 @@ func (ec *executionContext) unmarshalInputBookFilter(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
 			it.Title, err = ec.unmarshalOTextFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐTextFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAt"))
+			it.CreatedAt, err = ec.unmarshalODateFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐDateFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "author":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("author"))
+			it.Author, err = ec.unmarshalOAuthorFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "genre":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genre"))
+			it.Genre, err = ec.unmarshalOGenreFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreFilter(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3234,6 +3306,37 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lte"))
 			it.Lte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGenreFilter(ctx context.Context, obj interface{}) (adapters.GenreFilter, error) {
+	var it adapters.GenreFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOIntFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐIntFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOTextFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐTextFilter(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4798,6 +4901,14 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalOAuthorFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorFilter(ctx context.Context, v interface{}) (*adapters.AuthorFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAuthorFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOBookFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookFilter(ctx context.Context, v interface{}) (*adapters.BookFilter, error) {
 	if v == nil {
 		return nil, nil
@@ -4838,6 +4949,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalODateFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐDateFilter(ctx context.Context, v interface{}) (*adapters.DateFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDateFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOGenreFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreFilter(ctx context.Context, v interface{}) (*adapters.GenreFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGenreFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {

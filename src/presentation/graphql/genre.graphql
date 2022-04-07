@@ -8,3 +8,10 @@ type Genre {
     "updatedAt"
     updatedAt: Time!
 }
+
+input GenreFilter {
+    "id"
+    id: IntFilter
+    "title"
+    title: TextFilter
+}

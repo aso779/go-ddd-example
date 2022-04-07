@@ -8,3 +8,10 @@ type Author {
     "updatedAt"
     updatedAt: Time!
 }
+
+input AuthorFilter {
+    "id"
+    id: IntFilter
+    "name"
+    name: TextFilter
+}

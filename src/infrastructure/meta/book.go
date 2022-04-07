@@ -29,13 +29,13 @@ func (r BookMeta) Relations() map[string]metadata.Relation {
 		},
 	}
 
-	relations["Authors"] = entrel.ToMany{
+	relations["Author"] = entrel.ToMany{
 		Meta:      Parser(AuthorMeta{}),
 		JoinTable: "bks_authors",
 		ViaTable:  "bks_books_authors",
 		JoinColumns: []entrel.JoinColumn{
 			{
-				Name:           "books_id",
+				Name:           "book_id",
 				ReferencedName: "bks_books.id",
 			},
 		},
