@@ -1,11 +1,5 @@
 version: "3.6"
 services:
-  app:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    ports:
-      - "8002:8002"
   pg:
     container_name: pg
     image: postgres:13
@@ -14,4 +8,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - TZ=Europe/London
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+    ports:
+      - "9432:5432"
     command: [ "postgres", "-c", "log_statement=all" ]

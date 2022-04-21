@@ -5,8 +5,8 @@ logs:
   format: console
 postgres:
   read:
-    host: pg
-    port: 5432
+    host: localhost
+    port: 9432
     user: postgres
     password: postgres
     database: books
@@ -14,10 +14,10 @@ postgres:
     max_idle_cons: 5
     prefer_simple_protocol: false
     ssl_mode: disable
-    timezone: Europe/Kiev
+    timezone: Europe/London
   write:
-    host: pg
-    port: 5432
+    host: localhost
+    port: 9432
     user: postgres
     password: postgres
     database: books
@@ -25,4 +25,4 @@ postgres:
     max_idle_cons: 5
     prefer_simple_protocol: false
     ssl_mode: disable
-    timezone: Europe/Kiev
+    timezone: Europe/London

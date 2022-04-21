@@ -98,8 +98,6 @@ func (r CrudRepository[E, T]) FindPage(
 		tx = r.ConnSet.ReadPool()
 	}
 
-	//fields = r.repo.PrepareColumnNames(fields, r.entCache.GetPersistenceName())
-
 	query := tx.
 		NewSelect().
 		Model(&entities).
