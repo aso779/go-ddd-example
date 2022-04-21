@@ -7,8 +7,9 @@ import (
 )
 
 type GenreFilter struct {
-	ID    *IntFilter  `json:"id"`
-	Title *TextFilter `json:"title"`
+	ID       *IntFilter  `json:"id"`
+	ParentID *IntFilter  `json:"parentId"`
+	Title    *TextFilter `json:"title"`
 }
 
 func (r *GenreFilter) Build(parents ...string) dataset.CompositeSpecifier {
@@ -22,6 +23,14 @@ func (r *GenreFilter) Build(parents ...string) dataset.CompositeSpecifier {
 			}
 			if r.ID.In != nil {
 				spec.Append(dataspec.NewIn(filter.FieldName(parents, "id"), r.ID.In))
+			}
+		}
+		if r.ParentID != nil {
+			if r.ParentID.Eq != nil {
+				spec.Append(dataspec.NewEqual(filter.FieldName(parents, "parentId"), *r.ParentID.Eq))
+			}
+			if r.ParentID.In != nil {
+				spec.Append(dataspec.NewIn(filter.FieldName(parents, "parentId"), r.ParentID.In))
 			}
 		}
 		if r.Title != nil {

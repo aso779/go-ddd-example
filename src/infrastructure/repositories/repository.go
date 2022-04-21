@@ -63,14 +63,14 @@ func (r CrudRepository[E, T]) FindAll(
 	fields []string,
 	spec dataset.Specifier,
 ) (*[]E, error) {
-	var ents []E
+	var entities []E
 	if tx == nil {
 		tx = r.ConnSet.ReadPool()
 	}
 
 	query := tx.
 		NewSelect().
-		Model(&ents).
+		Model(&entities).
 		Column(fields...)
 	if spec != nil && !spec.IsEmpty() {
 		for _, j := range spec.Joins(r.Meta) {
@@ -82,7 +82,7 @@ func (r CrudRepository[E, T]) FindAll(
 
 	err := query.Scan(ctx)
 
-	return &ents, err
+	return &entities, err
 }
 
 func (r CrudRepository[E, T]) FindPage(
@@ -93,7 +93,7 @@ func (r CrudRepository[E, T]) FindPage(
 	page dataset.Pager,
 	sort dataset.Sorter,
 ) (*[]E, error) {
-	var ents []E
+	var entities []E
 	if tx == nil {
 		tx = r.ConnSet.ReadPool()
 	}
@@ -102,7 +102,7 @@ func (r CrudRepository[E, T]) FindPage(
 
 	query := tx.
 		NewSelect().
-		Model(&ents).
+		Model(&entities).
 		Column(fields...)
 	if spec != nil && !spec.IsEmpty() {
 		for _, j := range spec.Joins(r.Meta) {
@@ -121,16 +121,44 @@ func (r CrudRepository[E, T]) FindPage(
 
 	err := query.Scan(ctx)
 
-	return &ents, err
+	return &entities, err
 }
 
-func (r CrudRepository[E, T]) FindAllByIds(
+func (r CrudRepository[E, T]) FindAllByPks(
 	ctx context.Context,
 	tx bun.IDB,
 	fields []string,
-	ids []int,
+	pks []metadata.PrimaryKey,
 ) (*[]E, error) {
-	spec := dataspec.NewIn("id", bun.In(ids))
+	var keys []string
+	var values []any
+	var isComposite bool
+	var spec dataset.Specifier
+
+	for i, pk := range pks {
+		if i == 0 {
+			isComposite = pk.IsComposite()
+			keys = pk.Keys()
+		}
+
+		if isComposite {
+			var valuesGroup []any
+			for _, vv := range pk {
+				valuesGroup = append(valuesGroup, vv)
+			}
+			values = append(values, valuesGroup)
+		} else {
+			for _, vv := range pk {
+				values = append(values, vv)
+			}
+		}
+	}
+
+	if isComposite {
+		spec = dataspec.NewCompositeIn(keys, bun.In(values))
+	} else {
+		spec = dataspec.NewIn(keys[0], bun.In(values))
+	}
 
 	return r.FindAll(ctx, tx, fields, spec)
 }
@@ -183,7 +211,6 @@ func (r CrudRepository[E, T]) UpdateOne(
 	tx bun.IDB,
 	ent *E,
 	fields []string,
-	ftu []string,
 ) (*E, error) {
 	if tx == nil {
 		tx = r.ConnSet.WritePool()
@@ -191,7 +218,6 @@ func (r CrudRepository[E, T]) UpdateOne(
 
 	_, err := tx.NewUpdate().
 		Model(ent).
-		Column(ftu...).
 		WherePK().
 		Returning(strings.Join(fields, ",")).
 		Exec(ctx)

@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"github.com/aso779/go-ddd-example/domain"
+	"github.com/aso779/go-ddd-example/domain/values"
 	"time"
 )
 
@@ -17,7 +18,7 @@ func (r *BookOneCreateInput) ToEntity() *domain.Book {
 		GenreID:     r.GenreID,
 		Title:       r.Title,
 		Description: r.Description,
-		Price: domain.Price{
+		Price: values.Price{
 			Amount:   uint(r.Price.Amount),
 			Currency: r.Price.Currency,
 		},

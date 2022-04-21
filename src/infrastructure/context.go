@@ -70,8 +70,6 @@ func ParseInputChildren(c *ast.Value, prefix ...string) (res []string) {
 func ParseInputFields(ctx context.Context) (res []string) {
 	input := ParseInputFromContext(ctx)
 
-	// for single insert/update
-	//if input.Value.Kind != ast.Variable {
 	for _, field := range input.Value.Children {
 		if field.Value.Children != nil {
 			res = append(res, ParseInputChildren(field.Value, field.Name)...)
@@ -80,7 +78,6 @@ func ParseInputFields(ctx context.Context) (res []string) {
 		}
 
 	}
-	//}
 
 	return
 }

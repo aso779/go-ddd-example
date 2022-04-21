@@ -72,14 +72,19 @@ type ComplexityRoot struct {
 	Genre struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
+		ParentID  func(childComplexity int) int
 		Title     func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
 
 	Mutation struct {
-		BookDelete    func(childComplexity int, filter adapters.BookFilter) int
-		BookOneCreate func(childComplexity int, input adapters.BookOneCreateInput) int
-		BookOneUpdate func(childComplexity int, input adapters.BookOneUpdateInput) int
+		AuthorOneCreate func(childComplexity int, input adapters.AuthorOneCreateInput) int
+		AuthorOneUpdate func(childComplexity int, input adapters.AuthorOneUpdateInput) int
+		BookDelete      func(childComplexity int, filter adapters.BookFilter) int
+		BookOneCreate   func(childComplexity int, input adapters.BookOneCreateInput) int
+		BookOneUpdate   func(childComplexity int, input adapters.BookOneUpdateInput) int
+		GenreOneCreate  func(childComplexity int, input adapters.GenreOneCreateInput) int
+		GenreOneUpdate  func(childComplexity int, input adapters.GenreOneUpdateInput) int
 	}
 
 	PageInfo struct {
@@ -103,6 +108,10 @@ type MutationResolver interface {
 	BookOneCreate(ctx context.Context, input adapters.BookOneCreateInput) (*adapters.BookOutput, error)
 	BookOneUpdate(ctx context.Context, input adapters.BookOneUpdateInput) (*adapters.BookOutput, error)
 	BookDelete(ctx context.Context, filter adapters.BookFilter) (int, error)
+	AuthorOneCreate(ctx context.Context, input adapters.AuthorOneCreateInput) (*adapters.AuthorOutput, error)
+	AuthorOneUpdate(ctx context.Context, input adapters.AuthorOneUpdateInput) (*adapters.AuthorOutput, error)
+	GenreOneCreate(ctx context.Context, input adapters.GenreOneCreateInput) (*adapters.GenreOutput, error)
+	GenreOneUpdate(ctx context.Context, input adapters.GenreOneUpdateInput) (*adapters.GenreOutput, error)
 }
 type QueryResolver interface {
 	BookOne(ctx context.Context, filter adapters.BookFilter) (*adapters.BookOutput, error)
@@ -243,6 +252,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Genre.ID(childComplexity), true
 
+	case "Genre.parentId":
+		if e.complexity.Genre.ParentID == nil {
+			break
+		}
+
+		return e.complexity.Genre.ParentID(childComplexity), true
+
 	case "Genre.title":
 		if e.complexity.Genre.Title == nil {
 			break
@@ -256,6 +272,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Genre.UpdatedAt(childComplexity), true
+
+	case "Mutation.authorOneCreate":
+		if e.complexity.Mutation.AuthorOneCreate == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_authorOneCreate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AuthorOneCreate(childComplexity, args["input"].(adapters.AuthorOneCreateInput)), true
+
+	case "Mutation.authorOneUpdate":
+		if e.complexity.Mutation.AuthorOneUpdate == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_authorOneUpdate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AuthorOneUpdate(childComplexity, args["input"].(adapters.AuthorOneUpdateInput)), true
 
 	case "Mutation.bookDelete":
 		if e.complexity.Mutation.BookDelete == nil {
@@ -292,6 +332,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.BookOneUpdate(childComplexity, args["input"].(adapters.BookOneUpdateInput)), true
+
+	case "Mutation.genreOneCreate":
+		if e.complexity.Mutation.GenreOneCreate == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_genreOneCreate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenreOneCreate(childComplexity, args["input"].(adapters.GenreOneCreateInput)), true
+
+	case "Mutation.genreOneUpdate":
+		if e.complexity.Mutation.GenreOneUpdate == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_genreOneUpdate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenreOneUpdate(childComplexity, args["input"].(adapters.GenreOneUpdateInput)), true
 
 	case "PageInfo.number":
 		if e.complexity.PageInfo.Number == nil {
@@ -432,6 +496,18 @@ input AuthorFilter {
     id: IntFilter
     "name"
     name: TextFilter
+}
+
+input AuthorOneCreateInput {
+    "name"
+    name: String!
+}
+
+input AuthorOneUpdateInput {
+    "id"
+    id: Int!
+    "name"
+    name: String!
 }`, BuiltIn: false},
 	{Name: "presentation/graphql/book.graphql", Input: `type Book {
     "id"
@@ -515,6 +591,8 @@ input BookOneUpdateInput {
 	{Name: "presentation/graphql/genre.graphql", Input: `type Genre {
     "id"
     id: Int!
+    "parentId"
+    parentId: Int!
     "title"
     title: String!
     "createdAt"
@@ -526,8 +604,26 @@ input BookOneUpdateInput {
 input GenreFilter {
     "id"
     id: IntFilter
+    "parentId"
+    parentId: IntFilter
     "title"
     title: TextFilter
+}
+
+input GenreOneCreateInput {
+    "parentId"
+    parentId: Int!
+    "title"
+    title: String!
+}
+
+input GenreOneUpdateInput {
+    "id"
+    id: Int!
+    "parentId"
+    parentId: Int
+    "title"
+    title: String
 }`, BuiltIn: false},
 	{Name: "presentation/graphql/schema.graphql", Input: `type Query{
     bookOne(filter: BookFilter!): Book!
@@ -538,6 +634,10 @@ type Mutation{
     bookOneCreate(input: BookOneCreateInput!): Book!
     bookOneUpdate(input: BookOneUpdateInput!): Book!
     bookDelete(filter: BookFilter!): Int!
+    authorOneCreate(input: AuthorOneCreateInput!): Author!
+    authorOneUpdate(input: AuthorOneUpdateInput!): Author!
+    genreOneCreate(input: GenreOneCreateInput!): Genre!
+    genreOneUpdate(input: GenreOneUpdateInput!): Genre!
 }
 
 scalar Time
@@ -583,6 +683,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_authorOneCreate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 adapters.AuthorOneCreateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNAuthorOneCreateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOneCreateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_authorOneUpdate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 adapters.AuthorOneUpdateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNAuthorOneUpdateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOneUpdateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_bookDelete_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -620,6 +750,36 @@ func (ec *executionContext) field_Mutation_bookOneUpdate_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNBookOneUpdateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOneUpdateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_genreOneCreate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 adapters.GenreOneCreateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGenreOneCreateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOneCreateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_genreOneUpdate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 adapters.GenreOneUpdateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGenreOneUpdateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOneUpdateInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1286,6 +1446,41 @@ func (ec *executionContext) _Genre_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Genre_parentId(ctx context.Context, field graphql.CollectedField, obj *adapters.GenreOutput) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Genre",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ParentID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Genre_title(ctx context.Context, field graphql.CollectedField, obj *adapters.GenreOutput) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1515,6 +1710,174 @@ func (ec *executionContext) _Mutation_bookDelete(ctx context.Context, field grap
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_authorOneCreate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_authorOneCreate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AuthorOneCreate(rctx, args["input"].(adapters.AuthorOneCreateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*adapters.AuthorOutput)
+	fc.Result = res
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOutput(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_authorOneUpdate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_authorOneUpdate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AuthorOneUpdate(rctx, args["input"].(adapters.AuthorOneUpdateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*adapters.AuthorOutput)
+	fc.Result = res
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOutput(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_genreOneCreate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_genreOneCreate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GenreOneCreate(rctx, args["input"].(adapters.GenreOneCreateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*adapters.GenreOutput)
+	fc.Result = res
+	return ec.marshalNGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOutput(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_genreOneUpdate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_genreOneUpdate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GenreOneUpdate(rctx, args["input"].(adapters.GenreOneUpdateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*adapters.GenreOutput)
+	fc.Result = res
+	return ec.marshalNGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PageInfo_size(ctx context.Context, field graphql.CollectedField, obj *infrastructure.PageInfo) (ret graphql.Marshaler) {
@@ -3064,6 +3427,60 @@ func (ec *executionContext) unmarshalInputAuthorFilter(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputAuthorOneCreateInput(ctx context.Context, obj interface{}) (adapters.AuthorOneCreateInput, error) {
+	var it adapters.AuthorOneCreateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAuthorOneUpdateInput(ctx context.Context, obj interface{}) (adapters.AuthorOneUpdateInput, error) {
+	var it adapters.AuthorOneUpdateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBookFilter(ctx context.Context, obj interface{}) (adapters.BookFilter, error) {
 	var it adapters.BookFilter
 	asMap := map[string]interface{}{}
@@ -3332,11 +3749,89 @@ func (ec *executionContext) unmarshalInputGenreFilter(ctx context.Context, obj i
 			if err != nil {
 				return it, err
 			}
+		case "parentId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
+			it.ParentID, err = ec.unmarshalOIntFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐIntFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
 			it.Title, err = ec.unmarshalOTextFilter2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐTextFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGenreOneCreateInput(ctx context.Context, obj interface{}) (adapters.GenreOneCreateInput, error) {
+	var it adapters.GenreOneCreateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "parentId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
+			it.ParentID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGenreOneUpdateInput(ctx context.Context, obj interface{}) (adapters.GenreOneUpdateInput, error) {
+	var it adapters.GenreOneUpdateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "parentId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
+			it.ParentID, err = ec.unmarshalOInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3728,6 +4223,16 @@ func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "parentId":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Genre_parentId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "title":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Genre_title(ctx, field, obj)
@@ -3811,6 +4316,46 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "bookDelete":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_bookDelete(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "authorOneCreate":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_authorOneCreate(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "authorOneUpdate":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_authorOneUpdate(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "genreOneCreate":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_genreOneCreate(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "genreOneUpdate":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_genreOneUpdate(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -4482,6 +5027,26 @@ func (ec *executionContext) marshalNAuthor2ᚕgithubᚗcomᚋaso779ᚋgoᚑddd�
 	return ret
 }
 
+func (ec *executionContext) marshalNAuthor2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOutput(ctx context.Context, sel ast.SelectionSet, v *adapters.AuthorOutput) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Author(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAuthorOneCreateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOneCreateInput(ctx context.Context, v interface{}) (adapters.AuthorOneCreateInput, error) {
+	res, err := ec.unmarshalInputAuthorOneCreateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAuthorOneUpdateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐAuthorOneUpdateInput(ctx context.Context, v interface{}) (adapters.AuthorOneUpdateInput, error) {
+	res, err := ec.unmarshalInputAuthorOneUpdateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNBook2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐBookOutput(ctx context.Context, sel ast.SelectionSet, v adapters.BookOutput) graphql.Marshaler {
 	return ec._Book(ctx, sel, &v)
 }
@@ -4584,6 +5149,10 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNGenre2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOutput(ctx context.Context, sel ast.SelectionSet, v adapters.GenreOutput) graphql.Marshaler {
+	return ec._Genre(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOutput(ctx context.Context, sel ast.SelectionSet, v *adapters.GenreOutput) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4592,6 +5161,16 @@ func (ec *executionContext) marshalNGenre2ᚖgithubᚗcomᚋaso779ᚋgoᚑdddᚑ
 		return graphql.Null
 	}
 	return ec._Genre(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNGenreOneCreateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOneCreateInput(ctx context.Context, v interface{}) (adapters.GenreOneCreateInput, error) {
+	res, err := ec.unmarshalInputGenreOneCreateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNGenreOneUpdateInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐGenreOneUpdateInput(ctx context.Context, v interface{}) (adapters.GenreOneUpdateInput, error) {
+	res, err := ec.unmarshalInputGenreOneUpdateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {

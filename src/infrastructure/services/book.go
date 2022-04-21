@@ -64,18 +64,15 @@ func (r BookService) UpdateOne(
 	ctx context.Context,
 	book *domain.Book,
 	fields []string,
-	ftu []string,
 ) (*domain.Book, error) {
-	//validate
 	ent, err := r.bookRepo.CrudRepository.FindOneByPk(ctx, nil, []string{"*"}, book.PrimaryKey())
 	if err != nil {
 		return nil, err
 	}
 
 	book.ToExistsEntity(ent)
-	//validate
 
-	return r.bookRepo.CrudRepository.UpdateOne(ctx, nil, ent, fields, ftu)
+	return r.bookRepo.CrudRepository.UpdateOne(ctx, nil, ent, fields)
 }
 
 func (r BookService) Delete(

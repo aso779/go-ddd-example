@@ -36,7 +36,6 @@ type BookService interface {
 		ctx context.Context,
 		book *domain.Book,
 		fields []string,
-		ftu []string,
 	) (*domain.Book, error)
 
 	Delete(

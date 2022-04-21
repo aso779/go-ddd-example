@@ -1,6 +1,8 @@
 type Genre {
     "id"
     id: Int!
+    "parentId"
+    parentId: Int!
     "title"
     title: String!
     "createdAt"
@@ -12,6 +14,24 @@ type Genre {
 input GenreFilter {
     "id"
     id: IntFilter
+    "parentId"
+    parentId: IntFilter
     "title"
     title: TextFilter
+}
+
+input GenreOneCreateInput {
+    "parentId"
+    parentId: Int!
+    "title"
+    title: String!
+}
+
+input GenreOneUpdateInput {
+    "id"
+    id: Int!
+    "parentId"
+    parentId: Int
+    "title"
+    title: String
 }

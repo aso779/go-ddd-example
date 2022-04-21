@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/aso779/go-ddd-example/domain/values"
 	"github.com/aso779/go-ddd/domain/usecase/metadata"
 	"github.com/uptrace/bun"
 	"time"
@@ -8,19 +9,14 @@ import (
 
 type Book struct {
 	bun.BaseModel `bun:"table:bks_books,alias:bks_books"`
-	ID            int       `bun:"id,pk,autoincrement" json:"id"`
-	GenreID       int       `bun:"genre_id" json:"genreId"`
-	Title         string    `bun:"title" json:"title"`
-	Description   string    `bun:"description" json:"description"`
-	Price         Price     `bun:"embed:price_"`
-	CreatedAt     time.Time `bun:"created_at" json:"createdAt"`
-	UpdatedAt     time.Time `bun:"updated_at" json:"updatedAt"`
-	DeletedAt     time.Time `bun:",soft_delete,nullzero"`
-}
-
-type Price struct {
-	Amount   uint   `bun:"amount" json:"amount"`
-	Currency string `bun:"currency" json:"currency"`
+	ID            int          `bun:"id,pk,autoincrement" json:"id"`
+	GenreID       int          `bun:"genre_id" json:"genreId"`
+	Title         string       `bun:"title" json:"title"`
+	Description   string       `bun:"description" json:"description"`
+	Price         values.Price `bun:"embed:price_"`
+	CreatedAt     time.Time    `bun:"created_at" json:"createdAt"`
+	UpdatedAt     time.Time    `bun:"updated_at" json:"updatedAt"`
+	DeletedAt     time.Time    `bun:",soft_delete,nullzero"`
 }
 
 func (r Book) EntityName() string {
@@ -43,4 +39,5 @@ func (r *Book) ToExistsEntity(exists *Book) {
 	}
 	exists.Price.Amount = r.Price.Amount
 	exists.Price.Currency = r.Price.Currency
+	exists.UpdatedAt = r.UpdatedAt
 }

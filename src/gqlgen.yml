@@ -23,10 +23,18 @@ models:
     model: ./presentation/adapters.GenreOutput
   GenreFilter:
     model: ./presentation/adapters.GenreFilter
+  GenreOneCreateInput:
+    model: ./presentation/adapters.GenreOneCreateInput
+  GenreOneUpdateInput:
+    model: ./presentation/adapters.GenreOneUpdateInput
   Author:
     model: ./presentation/adapters.AuthorOutput
   AuthorFilter:
     model: ./presentation/adapters.AuthorFilter
+  AuthorOneCreateInput:
+    model: ./presentation/adapters.AuthorOneCreateInput
+  AuthorOneUpdateInput:
+    model: ./presentation/adapters.AuthorOneUpdateInput
   Page:
     model: ./infrastructure.Page
   PageInfo:

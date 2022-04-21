@@ -11,4 +11,16 @@ type GenreService interface {
 		fields []string,
 		ids []int,
 	) (*[]domain.Genre, error)
+
+	CreateOne(
+		ctx context.Context,
+		book *domain.Genre,
+		fields []string,
+	) (*domain.Genre, error)
+
+	UpdateOne(
+		ctx context.Context,
+		book *domain.Genre,
+		fields []string,
+	) (*domain.Genre, error)
 }

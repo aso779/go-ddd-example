@@ -22,3 +22,10 @@ func (r Author) EntityName() string {
 func (r Author) PrimaryKey() metadata.PrimaryKey {
 	return metadata.PrimaryKey{"id": r.ID}
 }
+
+func (r *Author) ToExistsEntity(exists *Author) {
+	if r.Name != "" {
+		exists.Name = r.Name
+	}
+	exists.UpdatedAt = r.UpdatedAt
+}

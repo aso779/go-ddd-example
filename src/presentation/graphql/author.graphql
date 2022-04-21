@@ -15,3 +15,15 @@ input AuthorFilter {
     "name"
     name: TextFilter
 }
+
+input AuthorOneCreateInput {
+    "name"
+    name: String!
+}
+
+input AuthorOneUpdateInput {
+    "id"
+    id: Int!
+    "name"
+    name: String!
+}

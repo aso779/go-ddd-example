@@ -7,6 +7,10 @@ type Mutation{
     bookOneCreate(input: BookOneCreateInput!): Book!
     bookOneUpdate(input: BookOneUpdateInput!): Book!
     bookDelete(filter: BookFilter!): Int!
+    authorOneCreate(input: AuthorOneCreateInput!): Author!
+    authorOneUpdate(input: AuthorOneUpdateInput!): Author!
+    genreOneCreate(input: GenreOneCreateInput!): Genre!
+    genreOneUpdate(input: GenreOneUpdateInput!): Genre!
 }
 
 scalar Time
