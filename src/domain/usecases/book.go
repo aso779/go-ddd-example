@@ -30,12 +30,14 @@ type BookService interface {
 		ctx context.Context,
 		book *domain.Book,
 		fields []string,
+		authors []int,
 	) (*domain.Book, error)
 
 	UpdateOne(
 		ctx context.Context,
 		book *domain.Book,
 		fields []string,
+		authors []int,
 	) (*domain.Book, error)
 
 	Delete(

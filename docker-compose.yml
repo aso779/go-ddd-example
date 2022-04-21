@@ -14,4 +14,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - TZ=Europe/London
+    ports:
+      - "9432:5432"
     command: [ "postgres", "-c", "log_statement=all" ]

@@ -56,6 +56,9 @@ input BookOneCreateInput {
     description: String
     "price"
     price: PriceInput!
+
+    "authors - set of authors ids"
+    authors: [Int!]!
 }
 
 input PriceInput {
@@ -76,4 +79,7 @@ input BookOneUpdateInput {
     description: String
     "price"
     price: PriceInput
+
+    "authors - set of authors ids"
+    authors: [Int!]!
 }

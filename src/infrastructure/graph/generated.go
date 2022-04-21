@@ -567,6 +567,9 @@ input BookOneCreateInput {
     description: String
     "price"
     price: PriceInput!
+
+    "authors - set of authors ids"
+    authors: [Int!]!
 }
 
 input PriceInput {
@@ -587,6 +590,9 @@ input BookOneUpdateInput {
     description: String
     "price"
     price: PriceInput
+
+    "authors - set of authors ids"
+    authors: [Int!]!
 }`, BuiltIn: false},
 	{Name: "presentation/graphql/genre.graphql", Input: `type Genre {
     "id"
@@ -3577,6 +3583,14 @@ func (ec *executionContext) unmarshalInputBookOneCreateInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
+		case "authors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authors"))
+			it.Authors, err = ec.unmarshalNInt2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3629,6 +3643,14 @@ func (ec *executionContext) unmarshalInputBookOneUpdateInput(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
 			it.Price, err = ec.unmarshalOPriceInput2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPriceInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "authors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authors"))
+			it.Authors, err = ec.unmarshalNInt2ᚕintᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5186,6 +5208,38 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v interface{}) ([]int, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNPrice2githubᚗcomᚋaso779ᚋgoᚑdddᚑexampleᚋpresentationᚋadaptersᚐPrice(ctx context.Context, sel ast.SelectionSet, v adapters.Price) graphql.Marshaler {

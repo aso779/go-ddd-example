@@ -120,8 +120,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "mutation bookOneCreate(\n    $genreId: Int!,\n    $title: String!,\n    $description: String,\n    $amount: Int!,\n    $currency: String!\n    ){\n    bookOneCreate(input:{\n          genreId: $genreId\n          title: $title\n          description: $description\n          price: {\n              amount: $amount\n              currency: $currency\n          }\n    })\n    {\n      id\n      genreId\n      title\n      description\n      price{\n          amount\n          currency\n      }\n    }\n}",
-								"variables": "{\n    \"genreId\": 1,\n    \"title\": \"book5\",\n    \"description\": \"\",\n    \"amount\": 6500,\n    \"currency\": \"USD\"\n}"
+								"query": "mutation bookOneCreate(\n    $genreId: Int!,\n    $title: String!,\n    $description: String,\n    $amount: Int!,\n    $currency: String!,\n    $authors: [Int!]!\n    ){\n    bookOneCreate(input:{\n          genreId: $genreId\n          title: $title\n          description: $description\n          price: {\n              amount: $amount\n              currency: $currency\n          }\n          authors: $authors\n    })\n    {\n      id\n      genreId\n      title\n      description\n      price{\n          amount\n          currency\n      }\n      genre{\n          id\n          title\n          createdAt\n          updatedAt\n        }\n        authors{\n          id\n          name\n        }\n    }\n}",
+								"variables": "{\n    \"genreId\": 2,\n    \"title\": \"Domain-Driven Design Distilled\",\n    \"description\": \"\",\n    \"amount\": 3649,\n    \"currency\": \"USD\",\n    \"authors\": [1,2]\n}"
 							}
 						},
 						"url": {
@@ -146,8 +146,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "mutation bookOneUpdate(\n    $id: Int!,\n    $genreId: Int!,\n    $title: String!,\n    $description: String,\n    $amount: Int!,\n    $currency: String!\n    ){\n    bookOneUpdate(input:{\n          id: $id\n          genreId: $genreId\n          title: $title\n          description: $description\n          price: {\n              amount: $amount\n              currency: $currency\n          }\n    })\n    {\n      id\n      genreId\n      title\n      description\n      price{\n          amount\n          currency\n      }\n      createdAt\n      updatedAt\n    }\n}",
-								"variables": "{\n    \"id\": 5,\n    \"genreId\": 1,\n    \"title\": \"book55\",\n    \"description\": \"\",\n    \"amount\": 7800,\n    \"currency\": \"USD\"\n}"
+								"query": "mutation bookOneUpdate(\n    $id: Int!,\n    $authors: [Int!]!\n    ){\n    bookOneUpdate(input:{\n          id: $id\n          authors: $authors\n    })\n    {\n      id\n      genreId\n      title\n      description\n      price{\n          amount\n          currency\n      }\n      genre{\n          id\n          title\n          createdAt\n          updatedAt\n        }\n        authors{\n          id\n          name\n      }\n      createdAt\n      updatedAt\n    }\n}",
+								"variables": "{\n    \"id\": 4,\n    \"authors\": [4,5,6,7,1]\n}"
 							}
 						},
 						"url": {
@@ -204,7 +204,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation authorOneCreate($name: String!){\n    authorOneCreate(input:{\n        name: $name\n    })\n    {\n      id\n      name\n      createdAt\n      updatedAt\n    }\n}",
-								"variables": "{\n    \"name\": \"test author\"\n}"
+								"variables": "{\n    \"name\": \"Robert C. Martin\"\n}"
 							}
 						},
 						"url": {
@@ -230,7 +230,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation authorOneUpdate($id: Int!, $name: String!){\n    authorOneUpdate(input:{\n        id: $id\n        name: $name\n    })\n    {\n      id\n      name\n      createdAt\n      updatedAt\n    }\n}",
-								"variables": "{\n    \"id\": 5,\n    \"name\": \"test author 3\"\n}"
+								"variables": "{\n    \"id\": 11,\n    \"name\": \"Robert C. Martin (“Uncle Bob”)\"\n}"
 							}
 						},
 						"url": {
@@ -261,7 +261,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation genreOneCreate($parentId: Int!, $title: String!){\n    genreOneCreate(input:{\n        parentId: $parentId\n        title: $title\n    })\n    {\n      id\n      title\n      createdAt\n      updatedAt\n    }\n}",
-								"variables": "{\n    \"parentId\": 1,\n    \"title\": \"test genre 2\"\n}"
+								"variables": "{\n    \"parentId\": 1,\n    \"title\": \"DevOops\"\n}"
 							}
 						},
 						"url": {
@@ -287,7 +287,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation genreOneUpdate($id: Int!, $title: String!){\n    genreOneUpdate(input:{\n        id: $id\n        title: $title\n    })\n    {\n      id\n      title\n      createdAt\n      updatedAt\n    }\n}",
-								"variables": "{\n    \"id\": 6,\n    \"title\": \"test genre 3\"\n}"
+								"variables": "{\n    \"id\": 6,\n    \"title\": \"DevOps\"\n}"
 							}
 						},
 						"url": {

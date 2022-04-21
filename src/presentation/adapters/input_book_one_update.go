@@ -12,6 +12,7 @@ type BookOneUpdateInput struct {
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
 	Price       PriceInput `json:"price"`
+	Authors     []int      `json:"authors"`
 }
 
 func (r *BookOneUpdateInput) ToEntity() *domain.Book {
