@@ -28,7 +28,7 @@ func (r BookRepository) AddAuthor(
 	bookId int,
 	authorId int,
 ) error {
-	values := map[string]interface{}{
+	values := map[string]any{
 		"book_id":   bookId,
 		"author_id": authorId,
 	}

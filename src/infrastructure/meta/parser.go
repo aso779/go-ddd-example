@@ -18,8 +18,8 @@ func structParser(t reflect.Type, m *entmeta.Meta, prefix ...string) {
 	for i := 0; i < t.NumField(); i++ {
 		if t.Field(i).Name == "BaseModel" {
 			tag := t.Field(i).Tag.Get("bun")
-			tagVals := strings.Split(tag, ",")
-			m.SetPersistenceName(strings.TrimPrefix(tagVals[0], "table:"))
+			tagValues := strings.Split(tag, ",")
+			m.SetPersistenceName(strings.TrimPrefix(tagValues[0], "table:"))
 			continue
 		}
 
@@ -61,6 +61,28 @@ func fieldParser(field reflect.StructField) (bool, *FieldTags) {
 	return false, nil
 }
 
+func relationsParser(relations map[string]metadata.Relation, parent string) map[string]metadata.Relation {
+	result := make(map[string]metadata.Relation)
+
+	for k, v := range relations {
+		var fullKey string
+		if parent == "" {
+			fullKey = k
+		} else {
+			fullKey = fmt.Sprintf("%s.%s", parent, k)
+		}
+		result[fullKey] = v
+		if len(v.GetMeta().Relations()) > 0 {
+			child := relationsParser(v.GetMeta().Relations(), fullKey)
+			for kk, vv := range child {
+				result[kk] = vv
+			}
+		}
+	}
+
+	return relations
+}
+
 var Parser = func(decorator metadata.EntityMetaDecorator) metadata.Meta {
 	m := entmeta.NewMeta()
 	m.SetDecorator(decorator)
@@ -70,18 +92,7 @@ var Parser = func(decorator metadata.EntityMetaDecorator) metadata.Meta {
 
 	structParser(t, m)
 
-	//TODO naming & recursion
-
-	relations := make(map[string]metadata.Relation)
-	for k, v := range decorator.Relations() {
-		relations[k] = v
-		for kk, vv := range v.GetMeta().Relations() {
-			compositeKey := fmt.Sprintf("%s.%s", k, kk)
-			relations[compositeKey] = vv
-		}
-	}
-
-	m.SetRelations(relations)
+	m.SetRelations(relationsParser(decorator.Relations(), ""))
 
 	return m
 }

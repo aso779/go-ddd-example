@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"fmt"
 	"github.com/aso779/go-ddd-example/application/config"
@@ -90,9 +91,10 @@ start:
 
 func Ping(pool *bun.DB) error {
 	if pool == nil {
-		//TODO err
+		panic("nil connection pool")
 	}
-	if _, err := pool.Exec("SELECT 1;"); err != nil {
+	err := pool.Ping()
+	if err != nil {
 		return err
 	}
 
@@ -103,7 +105,7 @@ func (r *ConnSet) connect(config config.Postgres) *bun.DB {
 	conn := pgdriver.NewConnector(
 		pgdriver.WithNetwork("tcp"),
 		pgdriver.WithAddr(fmt.Sprintf("%s:%d", config.Host, config.Port)),
-		//pgdriver.WithTLSConfig(&tls.Config{InsecureSkipVerify: true}),
+		pgdriver.WithTLSConfig(&tls.Config{InsecureSkipVerify: true}),
 		pgdriver.WithInsecure(true),
 		pgdriver.WithUser(config.User),
 		pgdriver.WithPassword(config.Password),
