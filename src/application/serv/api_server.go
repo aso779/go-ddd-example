@@ -5,6 +5,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/aso779/go-ddd-example/infrastructure/graph"
 	"github.com/aso779/go-ddd-example/infrastructure/graph/dataloaders"
 	"github.com/aso779/go-ddd-example/infrastructure/services"
@@ -34,8 +35,9 @@ func NewAPIServer(
 	queryHandler.Use(&extension.Introspection{})
 	queryHandler.Use(dataloaders.NewDataloaders(services))
 
-	mux.
-		Method("POST", "/graphql", queryHandler)
+	mux.Get("/", playground.Handler("GraphQL playground", "/graphql"))
+	mux.Method("POST", "/graphql", queryHandler)
+
 	if err := chi.Walk(mux, walkFunc); err != nil {
 		fmt.Printf("Logging err: %s\n", err.Error())
 	}
